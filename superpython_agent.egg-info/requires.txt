@@ -1,0 +1,11 @@
+openai
+ipython
+pygments
+ipywidgets
+
+[dev]
+pytest
+pytest-cov
+black
+flake8
+mypy
