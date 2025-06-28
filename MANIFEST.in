@@ -1,6 +1,4 @@
 include README.md
 include LICENSE.md
 include pyproject.toml
-include setup.py
-recursive-include superpython *.py
-recursive-include superpython/tests *.py 
+recursive-include src/sage *.py 

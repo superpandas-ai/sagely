@@ -1,0 +1,2 @@
+[console_scripts]
+sage = sage.agent:SageAgent

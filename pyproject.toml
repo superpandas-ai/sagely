@@ -3,52 +3,63 @@ requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "superpython-agent"
+name = "sage"
 version = "0.0.1"
 description = "LLM assistant for Python packages in REPLs and notebooks"
 readme = "README.md"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
-    {name = "SuperPandas Ltd", email = "superpython@superpandas.ai"}
+    {name = "SuperPandas Ltd", email = "sage@superpandas.ai"}
 ]
+keywords = ["llm", "ai", "assistant", "repl", "jupyter", "ipython", "documentation"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Documentation",
+    "Framework :: IPython",
+    "Framework :: Jupyter",
 ]
 requires-python = ">=3.8"
 dependencies = [
-    "openai",
-    "ipython",
-    "pygments",
-    "ipywidgets",
+    "openai>=1.0.0",
+    "ipython>=8.0.0",
+    "pygments>=2.0.0",
+    "ipywidgets>=8.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest",
-    "pytest-cov",
-    "black",
-    "flake8",
-    "mypy",
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
 ]
 
 [project.scripts]
-superpython = "superpython.agent:SuperPythonAgent"
+sage = "sage.agent:SageAgent"
 
 [project.urls]
-Homepage = "https://github.com/superpandas-ai/superpython"
-Repository = "https://github.com/superpandas-ai/superpython"
-Issues = "https://github.com/superpandas-ai/superpython/issues"
+Homepage = "https://github.com/superpandas-ai/sage"
+Repository = "https://github.com/superpandas-ai/sage"
+Issues = "https://github.com/superpandas-ai/sage/issues"
+Documentation = "https://github.com/superpandas-ai/sage#readme"
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
 
 [tool.black]
 line-length = 88

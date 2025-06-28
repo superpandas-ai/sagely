@@ -1,2 +1,0 @@
-[console_scripts]
-superpython = superpython.agent:SuperPythonAgent
