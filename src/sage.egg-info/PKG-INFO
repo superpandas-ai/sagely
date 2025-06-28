@@ -1,3 +1,44 @@
+Metadata-Version: 2.4
+Name: sage
+Version: 0.0.1
+Summary: LLM assistant for Python packages in REPLs and notebooks
+Author-email: SuperPandas Ltd <sage@superpandas.ai>
+License-Expression: MIT
+Project-URL: Homepage, https://github.com/superpandas-ai/sage
+Project-URL: Repository, https://github.com/superpandas-ai/sage
+Project-URL: Issues, https://github.com/superpandas-ai/sage/issues
+Project-URL: Documentation, https://github.com/superpandas-ai/sage#readme
+Keywords: llm,ai,assistant,repl,jupyter,ipython,documentation
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Software Development :: Documentation
+Classifier: Framework :: IPython
+Classifier: Framework :: Jupyter
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE.md
+Requires-Dist: openai>=1.0.0
+Requires-Dist: ipython>=8.0.0
+Requires-Dist: pygments>=2.0.0
+Requires-Dist: ipywidgets>=8.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: flake8>=6.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Dynamic: license-file
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/superpandas-ai/superpython/main/assets/banner.png" alt="Sage Agent Banner" width="100%" />
 </p>
