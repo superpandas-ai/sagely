@@ -20,24 +20,10 @@ from .prompts import (
     FINAL_RESPONSE_WITHOUT_WEB_PROMPT,
     SYSTEM_MESSAGE_TEMPLATE
 )
+from .config import get_config, print_status
 
 # Global module info cache instance
 _module_info_cache = ModuleInfoCache()
-
-
-def print_status(message: str, status_type: str = "info"):
-    """Print a status message with appropriate formatting."""
-    status_symbols = {
-        "info": "ℹ️",
-        "success": "✅",
-        "warning": "⚠️",
-        "error": "❌",
-        "search": "🔍",
-        "thinking": "🤔",
-        "cache": "📦"
-    }
-    symbol = status_symbols.get(status_type, "ℹ️")
-    print(f"{symbol} {message}")
 
 
 def extended_module_summary(module):
@@ -57,12 +43,15 @@ def extended_module_summary(module):
 @tool
 def analyze_module(module_name: str) -> str:
     """Analyze a Python module to extract its documentation and structure."""
-    print_status(f"Analyzing module '{module_name}'...", "info")
+    config = get_config()
+    if config.show_status_updates:
+        print_status(f"Analyzing module '{module_name}'...", "info")
     
     # Check cache first
     cached_info = _module_info_cache.get(module_name)
     if cached_info:
-        print_status(f"Using cached module info for '{module_name}'", "cache")
+        if config.show_status_updates:
+            print_status(f"Using cached module info for '{module_name}'", "cache")
         return cached_info
     
     try:
@@ -117,7 +106,8 @@ def analyze_module(module_name: str) -> str:
         
         # Cache the result
         _module_info_cache.set(module_name, result)
-        print_status(f"Successfully analyzed module '{module_name}'", "success")
+        if config.show_status_updates:
+            print_status(f"Successfully analyzed module '{module_name}'", "success")
         
         return result
         
@@ -125,30 +115,40 @@ def analyze_module(module_name: str) -> str:
         error_result = f"Error analyzing module {module_name}: {str(e)}"
         # Cache the error result too to avoid repeated failed attempts
         _module_info_cache.set(module_name, error_result)
-        print_status(f"Failed to analyze module '{module_name}': {str(e)}", "error")
+        if config.show_status_updates:
+            print_status(f"Failed to analyze module '{module_name}': {str(e)}", "error")
         return error_result
 
 
 @tool
 def get_error_context() -> str:
     """Get the recent traceback and error context."""
-    print_status("Gathering error context...", "info")
+    config = get_config()
+    if config.show_status_updates:
+        print_status("Gathering error context...", "info")
     traceback = get_recent_traceback()
     if traceback and traceback.strip():
-        print_status("Found recent error traceback", "warning")
+        if config.show_status_updates:
+            print_status("Found recent error traceback", "warning")
     else:
-        print_status("No recent errors found", "success")
+        if config.show_status_updates:
+            print_status("No recent errors found", "success")
     return traceback
 
 
 @tool
 def web_search(query: str) -> str:
     """Search the web for information about Python libraries and programming topics."""
-    print_status(f"Searching web for: '{query}'", "search")
+    config = get_config()
+    if not config.enable_web_search:
+        return "Web search is disabled in configuration"
+    
+    if config.show_status_updates:
+        print_status(f"Searching web for: '{query}'", "search")
     try:
         # Use DuckDuckGo Instant Answer API for web search
         search_url = f"https://api.duckduckgo.com/?q={quote_plus(query)}&format=json&no_html=1&skip_disambig=1"
-        response = requests.get(search_url, timeout=10)
+        response = requests.get(search_url, timeout=config.web_search_timeout)
         response.raise_for_status()
         
         data = response.json()
@@ -171,15 +171,18 @@ def web_search(query: str) -> str:
         
         if not result.strip():
             result = f"No specific information found for: {query}"
-            print_status(f"No web results found for: '{query}'", "warning")
+            if config.show_status_updates:
+                print_status(f"No web results found for: '{query}'", "warning")
         else:
-            print_status(f"Found web results for: '{query}'", "success")
+            if config.show_status_updates:
+                print_status(f"Found web results for: '{query}'", "success")
         
         return result
         
     except Exception as e:
         error_msg = f"Web search failed: {str(e)}"
-        print_status(error_msg, "error")
+        if config.show_status_updates:
+            print_status(error_msg, "error")
         return error_msg
 
 
@@ -202,16 +205,21 @@ class LangGraphAgent:
     """A simple LangGraph agent for handling Python package queries."""
     
     def __init__(self, model_name: str = "gpt-4"):
-        print_status(f"Initializing LangGraph agent with model: {model_name}", "info")
+        config = get_config()
+        if config.show_status_updates:
+            print_status(f"Initializing LangGraph agent with model: {model_name}", "info")
         self.llm = ChatOpenAI(model=model_name)
         self.cache = ResponseCache()
         self.module_cache = ModuleInfoCache()
         self.graph = self._build_graph()
-        print_status("LangGraph agent initialized successfully", "success")
+        if config.show_status_updates:
+            print_status("LangGraph agent initialized successfully", "success")
     
     def _build_graph(self):
         """Build the LangGraph workflow."""
-        print_status("Building LangGraph workflow...", "info")
+        config = get_config()
+        if config.show_status_updates:
+            print_status("Building LangGraph workflow...", "info")
         
         # Create the graph
         workflow = StateGraph(AgentState)
@@ -242,15 +250,18 @@ class LangGraphAgent:
         workflow.add_edge("generate_final_response", END)
         
         compiled_graph = workflow.compile()
-        print_status("LangGraph workflow built successfully", "success")
+        if config.show_status_updates:
+            print_status("LangGraph workflow built successfully", "success")
         return compiled_graph
     
     def _analyze_context_node(self, state: AgentState) -> AgentState:
         """Node to analyze the context and gather information."""
+        config = get_config()
         module_name = state["module_name"]
         context_obj = state.get("context_obj")
         
-        print_status(f"Starting context analysis for module: {module_name}", "info")
+        if config.show_status_updates:
+            print_status(f"Starting context analysis for module: {module_name}", "info")
         
         # Get traceback
         traceback = get_recent_traceback()
@@ -264,7 +275,8 @@ class LangGraphAgent:
             module_info = analyze_module.invoke({"module_name": module_name})
             # The analyze_module function already caches the result
         
-        print_status("Context analysis completed", "success")
+        if config.show_status_updates:
+            print_status("Context analysis completed", "success")
         
         return {
             "module_name": module_name,
@@ -287,12 +299,14 @@ class LangGraphAgent:
     
     def _generate_response_node(self, state: AgentState) -> AgentState:
         """Node to generate the initial response."""
+        config = get_config()
         question = state["question"]
         traceback = state["traceback"]
         context_summary = state["context_summary"]
         module_info = state["module_info"]
         
-        print_status("Generating initial response...", "thinking")
+        if config.show_status_updates:
+            print_status("Generating initial response...", "thinking")
         
         # Build the prompt using the template
         prompt = INITIAL_RESPONSE_PROMPT.format(
@@ -305,7 +319,8 @@ class LangGraphAgent:
         # Get response from LLM
         response = self.llm.invoke([HumanMessage(content=prompt)])
         
-        print_status("Initial response generated", "success")
+        if config.show_status_updates:
+            print_status("Initial response generated", "success")
         
         return {
             "module_name": state["module_name"],
@@ -323,11 +338,13 @@ class LangGraphAgent:
     
     def _orchestrator_node(self, state: AgentState) -> AgentState:
         """Orchestrator node that decides whether web search is needed."""
+        config = get_config()
         question = state["question"]
         answer = state["answer"]
         module_name = state["module_name"]
         
-        print_status("Evaluating if web search is needed...", "thinking")
+        if config.show_status_updates:
+            print_status("Evaluating if web search is needed...", "thinking")
         
         # Create a prompt to evaluate if the answer is sufficient
         evaluation_prompt = ORCHESTRATOR_EVALUATION_PROMPT.format(
@@ -342,9 +359,11 @@ class LangGraphAgent:
         needs_web_search = "NEEDS_WEB_SEARCH" in evaluation
         
         if needs_web_search:
-            print_status("Web search needed for comprehensive answer", "search")
+            if config.show_status_updates:
+                print_status("Web search needed for comprehensive answer", "search")
         else:
-            print_status("Initial answer is sufficient", "success")
+            if config.show_status_updates:
+                print_status("Initial answer is sufficient", "success")
         
         return {
             "module_name": state["module_name"],
@@ -362,14 +381,19 @@ class LangGraphAgent:
     
     def _should_use_web_search(self, state: AgentState) -> Literal["web_search", "final"]:
         """Determine if web search is needed."""
+        config = get_config()
+        if not config.enable_web_search:
+            return "final"
         return "web_search" if state["needs_web_search"] else "final"
     
     def _web_search_tool_node(self, state: AgentState) -> AgentState:
         """Node that performs web search for additional information."""
+        config = get_config()
         question = state["question"]
         module_name = state["module_name"]
         
-        print_status("Starting web search for additional information...", "search")
+        if config.show_status_updates:
+            print_status("Starting web search for additional information...", "search")
         
         # Create search queries
         search_queries = [
@@ -380,7 +404,8 @@ class LangGraphAgent:
         
         web_results = []
         for i, query in enumerate(search_queries, 1):
-            print_status(f"Web search {i}/{len(search_queries)}: {query[:50]}...", "search")
+            if config.show_status_updates:
+                print_status(f"Web search {i}/{len(search_queries)}: {query[:50]}...", "search")
             try:
                 result = web_search.invoke({"query": query})
                 if result and "No specific information found" not in result:
@@ -391,9 +416,11 @@ class LangGraphAgent:
         combined_results = "\n".join(web_results) if web_results else "No additional web information found."
         
         if combined_results and "No additional web information found" not in combined_results:
-            print_status("Web search completed with results", "success")
+            if config.show_status_updates:
+                print_status("Web search completed with results", "success")
         else:
-            print_status("No additional web information found", "warning")
+            if config.show_status_updates:
+                print_status("No additional web information found", "warning")
         
         return {
             "module_name": state["module_name"],
@@ -411,6 +438,7 @@ class LangGraphAgent:
     
     def _generate_final_response_node(self, state: AgentState) -> AgentState:
         """Node to generate the final comprehensive response."""
+        config = get_config()
         question = state["question"]
         initial_answer = state["answer"]
         web_results = state["web_search_results"]
@@ -419,7 +447,8 @@ class LangGraphAgent:
         context_summary = state["context_summary"]
         
         if web_results and "No additional web information found" not in web_results:
-            print_status("Generating final response with web search results...", "thinking")
+            if config.show_status_updates:
+                print_status("Generating final response with web search results...", "thinking")
             # Combine initial answer with web search results
             prompt = FINAL_RESPONSE_WITH_WEB_PROMPT.format(
                 question=question,
@@ -430,7 +459,8 @@ class LangGraphAgent:
                 context_summary=context_summary
             )
         else:
-            print_status("Generating final response from initial answer...", "thinking")
+            if config.show_status_updates:
+                print_status("Generating final response from initial answer...", "thinking")
             # Use the initial answer as the final answer
             prompt = FINAL_RESPONSE_WITHOUT_WEB_PROMPT.format(
                 question=question,
@@ -439,7 +469,8 @@ class LangGraphAgent:
         
         final_response = self.llm.invoke([HumanMessage(content=prompt)])
         
-        print_status("Final response generated successfully", "success")
+        if config.show_status_updates:
+            print_status("Final response generated successfully", "success")
         
         return {
             "module_name": state["module_name"],
@@ -457,18 +488,22 @@ class LangGraphAgent:
     
     def ask(self, module_name: str, question: str, context_obj: Optional[Any] = None, use_cache: bool = True) -> None:
         """Ask a question about a Python module."""
+        config = get_config()
         
-        print_status(f"Processing question about '{module_name}': {question[:50]}...", "info")
+        if config.show_status_updates:
+            print_status(f"Processing question about '{module_name}': {question[:50]}...", "info")
         
         # Check cache first
-        if use_cache:
+        if use_cache and config.enable_response_cache:
             cached = self.cache.get(module_name, question)
             if cached:
-                print_status("Using cached answer", "cache")
+                if config.show_status_updates:
+                    print_status("Using cached answer", "cache")
                 display_with_highlight(f"📦 Cached Answer:\n{cached}")
                 return
         
-        print_status("Starting LangGraph workflow execution...", "info")
+        if config.show_status_updates:
+            print_status("Starting LangGraph workflow execution...", "info")
         
         # Prepare state
         state: AgentState = {
@@ -490,11 +525,14 @@ class LangGraphAgent:
         answer = result["final_answer"]
         
         # Cache the result
-        self.cache.set(module_name, question, answer)
-        print_status("Answer cached for future use", "cache")
+        if config.enable_response_cache:
+            self.cache.set(module_name, question, answer)
+            if config.show_status_updates:
+                print_status("Answer cached for future use", "cache")
         
         # Display the result without returning it
-        print_status("Displaying final answer", "success")
+        if config.show_status_updates:
+            print_status("Displaying final answer", "success")
         display_with_highlight(answer)
 
     def clear_module_cache(self, module_name: Optional[str] = None) -> None:
@@ -504,12 +542,15 @@ class LangGraphAgent:
             module_name: If provided, clear cache for this specific module only.
                         If None, clear all module cache.
         """
+        config = get_config()
         if module_name:
             self.module_cache.clear_module(module_name)
-            print_status(f"Cleared module cache for '{module_name}'", "cache")
+            if config.show_status_updates:
+                print_status(f"Cleared module cache for '{module_name}'", "cache")
         else:
             self.module_cache.clear()
-            print_status("Cleared all module cache", "cache")
+            if config.show_status_updates:
+                print_status("Cleared all module cache", "cache")
 
     def is_module_cached(self, module_name: str) -> bool:
         """Check if module info is cached.

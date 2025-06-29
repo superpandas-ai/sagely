@@ -51,6 +51,14 @@ class ResponseCache:
         except IOError:
             pass  # Silently fail if we can't write to cache
 
+    def clear(self):
+        """Clear all cached responses."""
+        try:
+            for cache_file in self.cache_dir.glob("*.json"):
+                cache_file.unlink()
+        except IOError:
+            pass  # Silently fail if we can't clear cache
+
 
 class ModuleInfoCache:
     def __init__(self, cache_dir=None):

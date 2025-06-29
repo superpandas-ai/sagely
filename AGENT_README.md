@@ -2,6 +2,72 @@
 
 This document describes the enhanced LangGraph agent implementation in Sagely, which provides a more structured and extensible approach to handling Python package queries with web search capabilities.
 
+## ⚙️ Configuration System
+
+Sagely provides a centralized configuration system for customizing agent behavior, model selection, cache management, and more.
+
+### Accessing and Updating Configuration
+```python
+from sagely import get_config, update_config, clear_caches, clear_module_cache, reset_config, SageAgent
+
+# View current configuration
+config = get_config()
+print(config.get_config())
+
+# Update configuration (e.g., change model, disable status updates)
+update_config(model_name="gpt-3.5-turbo", show_status_updates=False)
+
+# Create a new agent with the updated model
+agent = SageAgent(model_name=get_config().model_name)
+
+# Reset configuration to defaults
+reset_config()
+```
+
+### Available Configuration Options
+- `model_name`: LLM model to use (default: "gpt-4")
+- `show_status_updates`: Show status outputs (default: True)
+- `enable_response_cache`: Enable/disable response caching (default: True)
+- `enable_module_cache`: Enable/disable module info caching (default: True)
+- `enable_web_search`: Enable/disable web search (default: True)
+- `web_search_timeout`: Timeout for web search requests (default: 10)
+- `enable_langsmith_tracing`: Enable LangSmith tracing (default: False)
+- `langsmith_project`: LangSmith project name (default: None)
+
+### Cache Management
+```python
+# Clear all caches
+clear_caches()
+
+# Clear only response cache
+clear_caches("response")
+
+# Clear only module cache
+clear_caches("module")
+
+# Clear module cache for a specific module
+clear_module_cache("json")
+```
+
+### Environment Variable Configuration
+You can also configure Sagely using environment variables:
+- `SAGELY_MODEL`
+- `SAGELY_SHOW_STATUS`
+- `SAGELY_ENABLE_RESPONSE_CACHE`
+- `SAGELY_ENABLE_MODULE_CACHE`
+- `SAGELY_ENABLE_WEB_SEARCH`
+- `SAGELY_WEB_SEARCH_TIMEOUT`
+- `SAGELY_ENABLE_LANGSMITH`
+- `SAGELY_LANGSMITH_PROJECT`
+
+Example:
+```bash
+export SAGELY_MODEL=gpt-4
+export SAGELY_SHOW_STATUS=false
+export SAGELY_ENABLE_WEB_SEARCH=false
+export SAGELY_WEB_SEARCH_TIMEOUT=15
+```
+
 ## LangSmith Tracing Support
 
 Sagely supports [LangSmith](https://smith.langchain.com/) for tracing and experiment tracking. To enable LangSmith tracing:

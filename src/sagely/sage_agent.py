@@ -1,30 +1,38 @@
 from .tracing import *
 import openai
 from .cache import ResponseCache
-from .langgraph_agent import LangGraphAgent, print_status
+from .langgraph_agent import LangGraphAgent
+from .config import get_config, print_status
 
 class SageAgent:
     def __init__(self, model_name: str = "gpt-4"):
-        print_status(f"Initializing SageAgent with model: {model_name}", "info")
+        config = get_config()
+        if config.show_status_updates:
+            print_status(f"Initializing SageAgent with model: {model_name}", "info")
         self.cache = ResponseCache()
         self.client = openai.OpenAI()
         self.langgraph_agent = LangGraphAgent(model_name)
-        print_status("SageAgent initialized successfully", "success")
+        if config.show_status_updates:
+            print_status("SageAgent initialized successfully", "success")
 
     def ask(self, module_name, question, context_obj=None, use_cache=True):
-        print_status(f"SageAgent processing question about '{module_name}'", "info")
+        config = get_config()
+        if config.show_status_updates:
+            print_status(f"SageAgent processing question about '{module_name}'", "info")
         
         # Check cache first
-        if use_cache:
+        if use_cache and config.enable_response_cache:
             cached = self.cache.get(module_name, question)
             if cached:
-                print_status("Using cached answer from SageAgent", "cache")
+                if config.show_status_updates:
+                    print_status("Using cached answer from SageAgent", "cache")
                 from .widgets import display_with_highlight
                 cached_response = f"📦 Cached Answer:\n{cached}"
                 display_with_highlight(cached_response)
                 return  # Do not return any value
         
-        print_status("No cached answer found, proceeding with LangGraph workflow", "info")
+        if config.show_status_updates:
+            print_status("No cached answer found, proceeding with LangGraph workflow", "info")
         
         # Prepare state for LangGraph agent
         state = {
@@ -46,8 +54,10 @@ class SageAgent:
         answer = result["final_answer"]
         
         # Cache the result
-        self.cache.set(module_name, question, answer)
-        print_status("Answer cached in SageAgent for future use", "cache")
+        if config.enable_response_cache:
+            self.cache.set(module_name, question, answer)
+            if config.show_status_updates:
+                print_status("Answer cached in SageAgent for future use", "cache")
         
         # Display the result
         from .widgets import display_with_highlight
