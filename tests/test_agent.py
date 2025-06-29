@@ -1,24 +1,23 @@
 import pytest
 from sagely.sage_agent import SageAgent
+from sagely.langgraph_agent import LangGraphAgent, create_agent, analyze_module, get_error_context
+from unittest.mock import Mock
+from langchain_core.messages import AIMessage
 
 def mock_openai_client(monkeypatch):
-    class MockChoices:
-        def __init__(self, content):
-            self.message = type('msg', (), {'content': content})
-    class MockCompletions:
-        def __init__(self):
-            self.create_call_count = 0
-        def create(self, **kwargs):
-            self.create_call_count += 1
-            return type('resp', (), {'choices': [MockChoices("sqrt is a mathematical function")]})()
-    class MockChat:
-        def __init__(self):
-            self.completions = MockCompletions()
-    class MockClient:
-        def __init__(self):
-            self.chat = MockChat()
-    monkeypatch.setattr("openai.OpenAI", lambda *args, **kwargs: MockClient())
-    return MockClient
+    # Create a mock response that LangChain expects
+    mock_response = Mock()
+    mock_response.content = "sqrt is a mathematical function"
+    
+    # Mock the ChatOpenAI class
+    mock_llm = Mock()
+    mock_llm.invoke.return_value = mock_response
+    mock_llm.model_name = "gpt-4"
+    
+    # Patch the ChatOpenAI import in the agent module
+    monkeypatch.setattr("sagely.langgraph_agent.ChatOpenAI", lambda *args, **kwargs: mock_llm)
+    
+    return mock_llm
 
 def test_caching(monkeypatch):
     mock_client = mock_openai_client(monkeypatch)()
@@ -83,3 +82,33 @@ def test_ask_function_call(monkeypatch):
     # Test with different module and question
     response2 = agent.ask("numpy", "How to create an array?")
     assert "sqrt is a mathematical function" in response2  # Same mock response 
+
+def test_create_agent():
+    """Test that we can create a LangGraph agent."""
+    agent = create_agent("gpt-4")
+    assert isinstance(agent, LangGraphAgent)
+    assert agent.llm.model_name == "gpt-4"
+
+def test_analyze_module_tool():
+    """Test the analyze_module tool."""
+    result = analyze_module.invoke({"module_name": "sys"})
+    assert isinstance(result, str)
+    assert "Functions:" in result
+
+def test_get_error_context_tool():
+    """Test the get_error_context tool."""
+    result = get_error_context.invoke({})
+    assert isinstance(result, str)
+
+def test_langgraph_agent_initialization():
+    """Test LangGraph agent initialization."""
+    agent = LangGraphAgent()
+    assert hasattr(agent, 'llm')
+    assert hasattr(agent, 'cache')
+    assert hasattr(agent, 'graph')
+
+def test_agent_state_structure():
+    """Test that the agent has the expected state structure."""
+    agent = LangGraphAgent()
+    # The graph should be compiled and ready to use
+    assert hasattr(agent.graph, 'invoke') 
