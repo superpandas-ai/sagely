@@ -49,12 +49,16 @@ There are thousands of Python libraries, but their docs aren't always intuitive.
 
 ## ✨ Features
 
-- �� Ask any module `.sage.ask("How do I do X?")`
+- 🧠 Ask any module `.sage.ask("How do I do X?")` (prints the answer)
 - 💡 Smart context: recent errors + object summaries
 - 🧩 Auto-attaches to every import
 - 💾 Caches answers to avoid repeated API calls
-- 🎨 Syntax-highlighted output with `pygments`
+- 📦 Caches module analysis for faster subsequent queries
+- 🎨 Syntax-highlighted output with `rich`
 - 🧠 IPython magic: `%sagely pandas how to merge?`
+- 🔍 **Real-time status updates** showing workflow progress
+- 🌐 **Web search integration** for up-to-date information
+- 📊 **LangSmith tracing** for debugging and monitoring
 
 ---
 
@@ -77,7 +81,7 @@ It hooks into all future imports.
 ```python
 import matplotlib
 
-matplotlib.sage.ask("how to make a scatter plot?")
+matplotlib.sage.ask("how to make a scatter plot?")  # This will print the answer, not return it
 ```
 
 ### In Jupyter / IPython
@@ -91,14 +95,43 @@ matplotlib.sage.ask("how to make a scatter plot?")
 ```python
 from sagely import agent
 
-agent.ask("requests", "how do I send a POST request?")
+agent.ask("requests", "how do I send a POST request?")  # Prints the answer, does not return it
+```
+
+### Status Outputs
+The agent provides real-time feedback about what it's doing:
+
+```
+ℹ️ Processing question about 'requests': How do I send a POST request?...
+ℹ️ Starting LangGraph workflow execution...
+ℹ️ Starting context analysis for module: requests
+ℹ️ Analyzing module 'requests'...
+✅ Successfully analyzed module 'requests'
+✅ Context analysis completed
+🤔 Generating initial response...
+✅ Initial response generated
+🤔 Evaluating if web search is needed...
+🔍 Web search needed for comprehensive answer
+🔍 Starting web search for additional information...
+🔍 Web search 1/3: requests python How do I send a POST request?...
+🔍 Web search 2/3: requests documentation How do I send a POST request?...
+🔍 Web search 3/3: python requests best practices How do I send a POST request?...
+✅ Web search completed with results
+🤔 Generating final response with web search results...
+✅ Final response generated successfully
+📦 Answer cached for future use
+✅ Displaying final answer
 ```
 
 ## 🔧 Requirements
 - openai
 - ipywidgets
-- pygments
+- rich
 - ipython
+- langgraph
+- langchain-openai
+- requests
+- langsmith (optional, for tracing)
 
 (Installed automatically.)
 
@@ -106,14 +139,18 @@ agent.ask("requests", "how do I send a POST request?")
 ```text
 sagely/
 ├── src/sagely/
-│   ├── agent.py
-│   ├── cache.py
-│   ├── context.py
-│   ├── import_hook.py
-│   ├── ipython_magics.py
-│   ├── widgets.py
+│   ├── langgraph_agent.py    # Main LangGraph-based agent
+│   ├── sage_agent.py         # High-level agent interface
+│   ├── cache.py              # Caching system
+│   ├── context.py            # Context gathering
+│   ├── import_hook.py        # Import hooking
+│   ├── ipython_magics.py     # IPython magic commands
+│   ├── prompts.py            # Prompt templates
+│   ├── tracing.py            # LangSmith tracing
+│   ├── widgets.py            # Display utilities
 │   └── __init__.py
 ├── tests/
+├── examples/                 # Usage examples
 ├── pyproject.toml
 ├── MANIFEST.in
 └── README.md

@@ -12,6 +12,9 @@ def display_with_highlight(text, lexer=None):
         text (str): The text to display with highlighting
         lexer (str, optional): The lexer to use for syntax highlighting. 
                               Defaults to "text" if None.
+    
+    Returns:
+        str: The original text that was displayed
     """
     # Use Rich console for IPython display
     console = Console(force_terminal=True)
@@ -46,4 +49,7 @@ def display_with_highlight(text, lexer=None):
     syntax = Syntax(text, syntax_lexer, theme="monokai", line_numbers=True)
     
     # Display using Rich console
-    console.print(syntax) 
+    console.print(syntax)
+    
+    # Return the original text
+    return text 

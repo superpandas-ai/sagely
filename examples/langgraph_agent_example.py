@@ -11,15 +11,13 @@ def main():
     
     # Example 1: Ask about a standard library module
     print("=== Example 1: Asking about 'math' module ===")
-    response = agent.ask("math", "What is the difference between math.floor and math.ceil?")
-    print(response)
+    agent.ask("math", "What is the difference between math.floor and math.ceil?")
     print()
     
     # Example 2: Ask about a third-party module (if available)
     try:
         print("=== Example 2: Asking about 'numpy' module ===")
-        response = agent.ask("numpy", "How do I create a 2D array?")
-        print(response)
+        agent.ask("numpy", "How do I create a 2D array?")
         print()
     except ImportError:
         print("numpy not available, skipping example 2")
@@ -28,8 +26,7 @@ def main():
     print("=== Example 3: Using different model ===")
     try:
         agent_gpt35 = create_agent("gpt-3.5-turbo")
-        response = agent_gpt35.ask("json", "How do I parse JSON in Python?")
-        print(response)
+        agent_gpt35.ask("json", "How do I parse JSON in Python?")
     except Exception as e:
         print(f"Error with gpt-3.5-turbo: {e}")
     

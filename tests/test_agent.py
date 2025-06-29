@@ -28,13 +28,14 @@ def test_caching(monkeypatch):
     if os.path.exists(cache_dir):
         shutil.rmtree(cache_dir)
     agent = SageAgent()
-    response1 = agent.ask("math", "What is sqrt?")
-    response2 = agent.ask("math", "What is sqrt?")
-    print(f"response1: {response1}")
-    print(f"response2: {response2}")
-    # First call should use API, second should use cache
-    assert "sqrt is a mathematical function" in response1
-    assert "📦 Cached Answer" in response2
+    with patch("sagely.widgets.display_with_highlight") as mock_display:
+        agent.ask("math", "What is sqrt?")
+        agent.ask("math", "What is sqrt?")
+        # First call should use API, second should use cache
+        # Check that display_with_highlight was called with the correct arguments
+        calls = [call.args[0] for call in mock_display.call_args_list]
+        assert any("sqrt is a mathematical function" in c for c in calls)
+        assert any("📦 Cached Answer" in c for c in calls)
 
 def test_display():
     from sagely.widgets import display_with_highlight
@@ -72,16 +73,15 @@ def test_ask_function_call(monkeypatch):
     
     # Create agent and test ask function
     agent = SageAgent()
-    
-    # Test the ask method with a simple question
-    response = agent.ask("math", "What is the square root function?")
-    
-    # Verify the response contains the expected content from mock
-    assert "sqrt is a mathematical function" in response
-    
-    # Test with different module and question
-    response2 = agent.ask("numpy", "How to create an array?")
-    assert "sqrt is a mathematical function" in response2  # Same mock response 
+    with patch("sagely.widgets.display_with_highlight") as mock_display:
+        agent.ask("math", "What is the square root function?")
+        # Should call display_with_highlight with the mock response
+        calls = [call.args[0] for call in mock_display.call_args_list]
+        assert any("sqrt is a mathematical function" in c for c in calls)
+        # Test with different module and question
+        agent.ask("numpy", "How to create an array?")
+        calls = [call.args[0] for call in mock_display.call_args_list]
+        assert any("sqrt is a mathematical function" in c for c in calls)  # Same mock response 
 
 def test_create_agent():
     """Test that we can create a LangGraph agent."""

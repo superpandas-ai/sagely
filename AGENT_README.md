@@ -21,6 +21,48 @@ Sagely supports [LangSmith](https://smith.langchain.com/) for tracing and experi
 
 For more details, see the [LangSmith docs](https://docs.smith.langchain.com/docs/tracing/).
 
+## Status Outputs
+
+The LangGraph agent provides real-time status updates throughout the workflow execution, giving users visibility into what's happening at each step:
+
+### Status Types
+- **ℹ️ info**: General information about the process
+- **✅ success**: Successful completion of a step
+- **⚠️ warning**: Warnings or non-critical issues
+- **❌ error**: Errors that occurred
+- **🔍 search**: Web search operations
+- **🤔 thinking**: AI processing and decision-making
+- **📦 cache**: Cache operations (hits/misses)
+
+### Example Status Flow
+```
+ℹ️ Processing question about 'requests': How do I send a POST request?...
+ℹ️ Starting LangGraph workflow execution...
+ℹ️ Starting context analysis for module: requests
+ℹ️ Analyzing module 'requests'...
+✅ Successfully analyzed module 'requests'
+✅ Context analysis completed
+🤔 Generating initial response...
+✅ Initial response generated
+🤔 Evaluating if web search is needed...
+🔍 Web search needed for comprehensive answer
+🔍 Starting web search for additional information...
+🔍 Web search 1/3: requests python How do I send a POST request?...
+🔍 Web search 2/3: requests documentation How do I send a POST request?...
+🔍 Web search 3/3: python requests best practices How do I send a POST request?...
+✅ Web search completed with results
+🤔 Generating final response with web search results...
+✅ Final response generated successfully
+📦 Answer cached for future use
+✅ Displaying final answer
+```
+
+### Benefits
+- **Transparency**: Users know exactly what the agent is doing
+- **Debugging**: Easy to identify where issues occur
+- **Performance**: Can see cache hits and workflow efficiency
+- **Trust**: Users understand the reasoning process
+
 ## Overview
 
 The `LangGraphAgent` class uses LangGraph to create a sophisticated workflow-based approach to answering questions about Python packages. It provides:
@@ -31,6 +73,7 @@ The `LangGraphAgent` class uses LangGraph to create a sophisticated workflow-bas
 - **Caching**: Automatic caching of responses for improved performance
 - **Extensibility**: Easy to add new nodes and tools to the workflow
 - **Separated prompts**: All prompts are stored in a separate file for easy customization and maintenance
+- **Real-time status updates**: Comprehensive feedback throughout the workflow execution
 
 ## Features
 
@@ -72,6 +115,9 @@ All prompts are stored in `sagely.prompts` for easy customization:
 
 ### 6. Caching
 Responses are automatically cached using the existing `ResponseCache` system.
+
+### 7. Status Outputs
+Real-time feedback throughout the workflow execution with categorized status messages.
 
 ## Usage
 

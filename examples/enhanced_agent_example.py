@@ -13,20 +13,17 @@ def main():
     
     # Example 1: Simple question that might not need web search
     print("=== Example 1: Basic Python question ===")
-    response = agent.ask("math", "What is the difference between math.floor and math.ceil?")
-    print(response)
+    agent.ask("math", "What is the difference between math.floor and math.ceil?")
     print()
     
     # Example 2: More complex question that might benefit from web search
     print("=== Example 2: Complex question about latest features ===")
-    response = agent.ask("pandas", "What are the latest features in pandas 2.0 and how do I use them?")
-    print(response)
+    agent.ask("pandas", "What are the latest features in pandas 2.0 and how do I use them?")
     print()
     
     # Example 3: Question about best practices that might need web search
     print("=== Example 3: Best practices question ===")
-    response = agent.ask("numpy", "What are the current best practices for memory-efficient array operations in NumPy?")
-    print(response)
+    agent.ask("numpy", "What are the current best practices for memory-efficient array operations in NumPy?")
     print()
     
     # Example 4: Test web search tool directly
