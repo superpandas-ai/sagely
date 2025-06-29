@@ -11,4 +11,4 @@ class SageAgent:
 
     def ask(self, module_name, question, context_obj=None, use_cache=True):
         # Use the LangGraph agent for processing
-        return self.langgraph_agent.ask(module_name, question, context_obj, use_cache) 
+        self.langgraph_agent.ask(module_name, question, context_obj, use_cache) 

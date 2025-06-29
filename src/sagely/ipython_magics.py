@@ -20,7 +20,7 @@ def load_ipython_extension(ipython):
             question = ' '.join(parts[1:])
             from sagely.sage_agent import SageAgent
             agent = SageAgent()
-            return agent.ask(module_name, question)
+            agent.ask(module_name, question)
         register_line_magic(sage_magic)
         print("sagely extension loaded. Use %sagely <module> <question> to ask questions.")
     except Exception:

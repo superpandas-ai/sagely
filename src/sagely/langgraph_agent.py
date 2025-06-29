@@ -373,14 +373,15 @@ class LangGraphAgent:
             "final_answer": final_response.content
         }
     
-    def ask(self, module_name: str, question: str, context_obj: Optional[Any] = None, use_cache: bool = True) -> str:
+    def ask(self, module_name: str, question: str, context_obj: Optional[Any] = None, use_cache: bool = True) -> None:
         """Ask a question about a Python module."""
         
         # Check cache first
         if use_cache:
             cached = self.cache.get(module_name, question)
             if cached:
-                return display_with_highlight(f"📦 Cached Answer:\n{cached}")
+                display_with_highlight(f"📦 Cached Answer:\n{cached}")
+                return
         
         # Prepare state
         state: AgentState = {
@@ -404,7 +405,8 @@ class LangGraphAgent:
         # Cache the result
         self.cache.set(module_name, question, answer)
         
-        return display_with_highlight(answer)
+        # Display the result without returning it
+        display_with_highlight(answer)
 
 
 # Convenience function to create an agent instance
