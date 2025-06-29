@@ -39,6 +39,7 @@ dependencies = [
     "langchain-openai>=0.0.5",
     "langchain-core>=0.1.0",
     "requests>=2.25.0",
+    "langsmith>=0.0.45",
 ]
 
 [project.optional-dependencies]

@@ -2,6 +2,25 @@
 
 This document describes the enhanced LangGraph agent implementation in Sagely, which provides a more structured and extensible approach to handling Python package queries with web search capabilities.
 
+## LangSmith Tracing Support
+
+Sagely supports [LangSmith](https://smith.langchain.com/) for tracing and experiment tracking. To enable LangSmith tracing:
+
+1. **Install dependencies** (already included):
+   - `langsmith`
+   - `langchain-core`
+
+2. **Set environment variables** (in your shell or `.env` file):
+   ```sh
+   export LANGCHAIN_TRACING_V2=true
+   export LANGCHAIN_API_KEY=your-langsmith-api-key
+   export LANGCHAIN_PROJECT=your-project-name  # optional
+   ```
+
+3. **Run your code as usual**. All LangChain and LangGraph runs will be traced to your LangSmith dashboard.
+
+For more details, see the [LangSmith docs](https://docs.smith.langchain.com/docs/tracing/).
+
 ## Overview
 
 The `LangGraphAgent` class uses LangGraph to create a sophisticated workflow-based approach to answering questions about Python packages. It provides:
