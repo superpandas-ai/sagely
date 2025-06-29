@@ -11,6 +11,7 @@ The `LangGraphAgent` class uses LangGraph to create a sophisticated workflow-bas
 - **Tool integration**: Built-in tools for module analysis, error context extraction, and web search
 - **Caching**: Automatic caching of responses for improved performance
 - **Extensibility**: Easy to add new nodes and tools to the workflow
+- **Separated prompts**: All prompts are stored in a separate file for easy customization and maintenance
 
 ## Features
 
@@ -23,18 +24,34 @@ The agent uses a five-node workflow:
 - **generate_final_response**: Creates comprehensive final answer
 
 ### 2. Built-in Tools
-- `analyze_module`: Extracts documentation and functions from Python modules
+- `analyze_module`: Extracts comprehensive documentation and structure from Python modules
 - `get_error_context`: Retrieves recent traceback information
 - `web_search`: Searches the web for additional information using DuckDuckGo API
 
-### 3. Intelligent Orchestration
+### 3. Enhanced Module Analysis
+The `analyze_module` tool provides comprehensive module analysis including:
+- **Module documentation**: Full module docstring
+- **Functions**: List of functions with docstrings (truncated for readability)
+- **Classes**: List of classes with docstrings (truncated for readability)
+- **Submodules**: List of submodules within the module
+- **Smart truncation**: Limits output to prevent overwhelming responses while showing totals
+
+### 4. Intelligent Orchestration
 The orchestrator node uses AI to evaluate whether the initial answer is sufficient:
 - Checks if the answer directly addresses the question
 - Evaluates if enough detail and examples are provided
 - Considers if edge cases and best practices are covered
 - Determines if the information is up-to-date
 
-### 4. Caching
+### 5. Separated Prompts
+All prompts are stored in `sagely.prompts` for easy customization:
+- `INITIAL_RESPONSE_PROMPT`: Template for generating initial responses
+- `ORCHESTRATOR_EVALUATION_PROMPT`: Template for evaluating answer sufficiency
+- `FINAL_RESPONSE_WITH_WEB_PROMPT`: Template for final responses with web search
+- `FINAL_RESPONSE_WITHOUT_WEB_PROMPT`: Template for final responses without web search
+- `SYSTEM_MESSAGE_TEMPLATE`: Template for system messages
+
+### 6. Caching
 Responses are automatically cached using the existing `ResponseCache` system.
 
 ## Usage
@@ -70,9 +87,10 @@ response = agent.ask("pandas", "What are the latest performance improvements in 
 ```python
 from sagely.langgraph_agent import analyze_module, get_error_context, web_search
 
-# Analyze a module
-module_info = analyze_module.invoke({"module_name": "math"})
+# Analyze a module with comprehensive information
+module_info = analyze_module.invoke({"module_name": "json"})
 print(module_info)
+# Output includes: documentation, functions with docstrings, classes, and submodules
 
 # Get error context
 error_info = get_error_context.invoke({})
@@ -81,6 +99,25 @@ print(error_info)
 # Search the web
 web_result = web_search.invoke({"query": "python pandas performance optimization"})
 print(web_result)
+```
+
+### Using Prompts Directly
+
+```python
+from sagely.prompts import (
+    INITIAL_RESPONSE_PROMPT,
+    ORCHESTRATOR_EVALUATION_PROMPT,
+    SYSTEM_MESSAGE_TEMPLATE
+)
+
+# Use prompts for custom implementations
+system_msg = SYSTEM_MESSAGE_TEMPLATE.format(module_name="numpy")
+initial_prompt = INITIAL_RESPONSE_PROMPT.format(
+    traceback="No errors",
+    context_summary="Working with arrays",
+    module_info="NumPy module info",
+    question="How to create arrays?"
+)
 ```
 
 ## Architecture
@@ -104,16 +141,16 @@ The agent uses a structured state object that includes:
 #### analyze_context Node
 - Retrieves traceback information
 - Summarizes context objects
-- Analyzes target module
+- Analyzes target module using enhanced analysis
 - Prepares system message
 
 #### generate_response Node
-- Builds comprehensive prompt
+- Builds comprehensive prompt using `INITIAL_RESPONSE_PROMPT`
 - Calls LLM for initial response
 - Returns initial answer
 
 #### orchestrator Node
-- Evaluates initial answer quality
+- Evaluates initial answer quality using `ORCHESTRATOR_EVALUATION_PROMPT`
 - Uses AI to determine if web search is needed
 - Sets `needs_web_search` flag
 
@@ -124,6 +161,7 @@ The agent uses a structured state object that includes:
 
 #### generate_final_response Node
 - Combines initial answer with web search results
+- Uses `FINAL_RESPONSE_WITH_WEB_PROMPT` or `FINAL_RESPONSE_WITHOUT_WEB_PROMPT`
 - Creates comprehensive final response
 - Ensures answer addresses the question completely
 
@@ -166,6 +204,81 @@ The agent performs multiple searches with different query formulations:
 - Fallback to initial answer if web search fails
 - Timeout protection (10 seconds)
 
+## Module Analysis Features
+
+### Comprehensive Analysis
+The `extended_module_summary` function provides:
+- **Functions**: All functions with their docstrings
+- **Classes**: All classes with their docstrings  
+- **Submodules**: All submodules within the module
+- **Documentation**: Full module docstring
+
+### Smart Output Formatting
+- **Truncated docstrings**: Long docstrings are truncated to 100 characters for readability
+- **Limited listings**: Shows first 15 functions, 10 classes, and 10 submodules
+- **Total counts**: Shows total number of items in each category
+- **Structured output**: Clear sections for functions, classes, and submodules
+
+### Example Output
+```
+Module: json
+Documentation: JSON (JavaScript Object Notation) is a subset of JavaScript syntax...
+
+Functions (5 total):
+- dump: Serialize ``obj`` as a JSON formatted stream to ``fp``...
+- dumps: Serialize ``obj`` to a JSON formatted ``str``...
+- load: Deserialize ``fp`` (a ``.read()``-supporting file-like object...
+- loads: Deserialize ``s`` (a ``str``, ``bytes`` or ``bytearray`` instance...
+
+Classes (3 total):
+- JSONDecodeError: Subclass of ValueError with the following additional properties...
+- JSONDecoder: Simple JSON decoder...
+- JSONEncoder: Extensible JSON encoder for Python data structures...
+
+Submodules (4 total):
+- codecs
+- decoder
+- encoder
+- scanner
+```
+
+## Prompt Customization
+
+### Available Prompts
+All prompts are available in the `sagely.prompts` module:
+
+```python
+from sagely.prompts import (
+    INITIAL_RESPONSE_PROMPT,
+    ORCHESTRATOR_EVALUATION_PROMPT,
+    FINAL_RESPONSE_WITH_WEB_PROMPT,
+    FINAL_RESPONSE_WITHOUT_WEB_PROMPT,
+    SYSTEM_MESSAGE_TEMPLATE
+)
+```
+
+### Customizing Prompts
+You can customize prompts for specific use cases:
+
+```python
+# Modify system message for specific domain
+custom_system = SYSTEM_MESSAGE_TEMPLATE.format(module_name="pandas") + "\nFocus on data analysis."
+
+# Create custom evaluation prompt
+custom_eval = ORCHESTRATOR_EVALUATION_PROMPT + "\nAlso consider performance implications."
+```
+
+### Prompt Templates
+All prompts use Python's string formatting with named parameters:
+- `{question}`: User's question
+- `{module_name}`: Target module name
+- `{answer}`: Current answer for evaluation
+- `{traceback}`: Recent error traceback
+- `{context_summary}`: Summary of context object
+- `{module_info}`: Analyzed module information
+- `{initial_answer}`: Initial response
+- `{web_results}`: Web search results
+
 ## Extending the Agent
 
 ### Adding New Tools
@@ -204,6 +317,19 @@ def custom_orchestrator_logic(state: AgentState) -> AgentState:
     return {**state, "needs_web_search": needs_search}
 ```
 
+### Adding New Prompts
+
+```python
+# In sagely.prompts
+CUSTOM_PROMPT = """
+Custom prompt template with {parameter1} and {parameter2}.
+"""
+
+# In your agent
+from .prompts import CUSTOM_PROMPT
+prompt = CUSTOM_PROMPT.format(parameter1="value1", parameter2="value2")
+```
+
 ## Dependencies
 
 The enhanced LangGraph agent requires these additional dependencies:
@@ -216,15 +342,15 @@ These are automatically included when installing Sagely.
 
 ## Examples
 
-See `examples/enhanced_agent_example.py` for complete usage examples demonstrating:
-- Basic questions that don't need web search
-- Complex questions that benefit from web search
-- Direct web search tool usage
-- Workflow information and node descriptions
+See the following example files:
+- `examples/enhanced_agent_example.py`: Complete usage examples demonstrating the enhanced agent
+- `examples/prompts_example.py`: Examples of using prompts directly
 
 ## Performance Considerations
 
 - **Caching**: All responses are cached to avoid repeated API calls
 - **Conditional Web Search**: Web search only occurs when needed
 - **Timeout Protection**: Web searches have 10-second timeout
-- **Multiple Queries**: Uses multiple search strategies for comprehensive results 
+- **Multiple Queries**: Uses multiple search strategies for comprehensive results
+- **Smart Module Analysis**: Comprehensive analysis with intelligent truncation
+- **Separated Prompts**: Easy to customize and maintain prompts without code changes 

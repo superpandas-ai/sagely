@@ -1,6 +1,6 @@
 import pytest
 from sagely.sage_agent import SageAgent
-from sagely.langgraph_agent import LangGraphAgent, create_agent, analyze_module, get_error_context, web_search
+from sagely.langgraph_agent import LangGraphAgent, create_agent, analyze_module, get_error_context, web_search, extended_module_summary
 from unittest.mock import Mock, patch
 from langchain_core.messages import AIMessage
 
@@ -94,6 +94,34 @@ def test_analyze_module_tool():
     result = analyze_module.invoke({"module_name": "sys"})
     assert isinstance(result, str)
     assert "Functions:" in result
+
+def test_extended_module_summary():
+    """Test the extended_module_summary function."""
+    import sys
+    summary = extended_module_summary(sys)
+    
+    # Check that summary has the expected structure
+    assert "functions" in summary
+    assert "classes" in summary
+    assert "submodules" in summary
+    
+    # Check that all values are lists
+    assert isinstance(summary["functions"], list)
+    assert isinstance(summary["classes"], list)
+    assert isinstance(summary["submodules"], list)
+    
+    # Check that functions and classes have tuples with name and docstring
+    if summary["functions"]:
+        assert isinstance(summary["functions"][0], tuple)
+        assert len(summary["functions"][0]) == 2
+        assert isinstance(summary["functions"][0][0], str)  # name
+        assert isinstance(summary["functions"][0][1], (str, type(None)))  # docstring or None
+    
+    if summary["classes"]:
+        assert isinstance(summary["classes"][0], tuple)
+        assert len(summary["classes"][0]) == 2
+        assert isinstance(summary["classes"][0][0], str)  # name
+        assert isinstance(summary["classes"][0][1], (str, type(None)))  # docstring or None
 
 def test_get_error_context_tool():
     """Test the get_error_context tool."""

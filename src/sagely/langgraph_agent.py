@@ -12,18 +12,84 @@ import re
 from .cache import ResponseCache
 from .context import get_recent_traceback, summarize_object
 from .widgets import display_with_highlight
+from .prompts import (
+    INITIAL_RESPONSE_PROMPT,
+    ORCHESTRATOR_EVALUATION_PROMPT,
+    FINAL_RESPONSE_WITH_WEB_PROMPT,
+    FINAL_RESPONSE_WITHOUT_WEB_PROMPT,
+    SYSTEM_MESSAGE_TEMPLATE
+)
+
+
+def extended_module_summary(module):
+    """Provide a comprehensive summary of a Python module including functions, classes, and submodules."""
+    members = inspect.getmembers(module)
+    summary = {"functions": [], "classes": [], "submodules": []}
+    for name, obj in members:
+        if inspect.isfunction(obj):
+            summary["functions"].append((name, inspect.getdoc(obj)))
+        elif inspect.isclass(obj):
+            summary["classes"].append((name, inspect.getdoc(obj)))
+        elif inspect.ismodule(obj):
+            summary["submodules"].append(name)
+    return summary
 
 
 @tool
 def analyze_module(module_name: str) -> str:
-    """Analyze a Python module to extract its documentation and functions."""
+    """Analyze a Python module to extract its documentation and structure."""
     try:
         __import__(module_name)
         mod = sys.modules[module_name]
         doc = inspect.getdoc(mod)
-        members = inspect.getmembers(mod)
-        functions = [name for name, obj in members if inspect.isfunction(obj)]
-        return f"Documentation: {doc}\nFunctions: {functions[:20]}"
+        
+        # Use the extended module summary
+        summary = extended_module_summary(mod)
+        
+        # Format the summary
+        result = f"Module: {module_name}\n"
+        if doc:
+            result += f"Documentation: {doc}\n\n"
+        
+        # Add functions (limit to first 15 for readability)
+        if summary["functions"]:
+            result += f"Functions ({len(summary['functions'])} total):\n"
+            for name, func_doc in summary["functions"][:15]:
+                result += f"- {name}"
+                if func_doc:
+                    # Truncate long docstrings
+                    doc_preview = func_doc[:100] + "..." if len(func_doc) > 100 else func_doc
+                    result += f": {doc_preview}"
+                result += "\n"
+            if len(summary["functions"]) > 15:
+                result += f"... and {len(summary['functions']) - 15} more functions\n"
+            result += "\n"
+        
+        # Add classes (limit to first 10 for readability)
+        if summary["classes"]:
+            result += f"Classes ({len(summary['classes'])} total):\n"
+            for name, class_doc in summary["classes"][:10]:
+                result += f"- {name}"
+                if class_doc:
+                    # Truncate long docstrings
+                    doc_preview = class_doc[:100] + "..." if len(class_doc) > 100 else class_doc
+                    result += f": {doc_preview}"
+                result += "\n"
+            if len(summary["classes"]) > 10:
+                result += f"... and {len(summary['classes']) - 10} more classes\n"
+            result += "\n"
+        
+        # Add submodules
+        if summary["submodules"]:
+            result += f"Submodules ({len(summary['submodules'])} total):\n"
+            for name in summary["submodules"][:10]:
+                result += f"- {name}\n"
+            if len(summary["submodules"]) > 10:
+                result += f"... and {len(summary['submodules']) - 10} more submodules\n"
+            result += "\n"
+        
+        return result
+        
     except Exception as e:
         return f"Error analyzing module {module_name}: {str(e)}"
 
@@ -150,7 +216,7 @@ class LangGraphAgent:
             "messages": [
                 {
                     "role": "system",
-                    "content": f"You are an assistant for the Python library '{module_name}'. Provide helpful, accurate answers about the library."
+                    "content": SYSTEM_MESSAGE_TEMPLATE.format(module_name=module_name)
                 }
             ],
             "answer": "",
@@ -166,22 +232,13 @@ class LangGraphAgent:
         context_summary = state["context_summary"]
         module_info = state["module_info"]
         
-        # Build the prompt
-        prompt = f"""
-Recent Error (if any):
-{traceback}
-
-Context Object:
-{context_summary}
-
-Package Info:
-{module_info}
-
-User Question:
-{question}
-
-Please provide a comprehensive answer based on the available information.
-"""
+        # Build the prompt using the template
+        prompt = INITIAL_RESPONSE_PROMPT.format(
+            traceback=traceback,
+            context_summary=context_summary,
+            module_info=module_info,
+            question=question
+        )
         
         # Get response from LLM
         response = self.llm.invoke([HumanMessage(content=prompt)])
@@ -207,22 +264,11 @@ Please provide a comprehensive answer based on the available information.
         module_name = state["module_name"]
         
         # Create a prompt to evaluate if the answer is sufficient
-        evaluation_prompt = f"""
-You are evaluating whether an answer to a Python programming question is sufficient.
-
-Question: {question}
-Module: {module_name}
-Current Answer: {answer}
-
-Evaluate if this answer is comprehensive and accurate enough to fully address the user's question.
-Consider:
-1. Does it directly answer the question?
-2. Does it provide enough detail and examples?
-3. Does it cover edge cases or common issues?
-4. Is it up-to-date with current best practices?
-
-Respond with either "SUFFICIENT" or "NEEDS_WEB_SEARCH" followed by a brief explanation.
-"""
+        evaluation_prompt = ORCHESTRATOR_EVALUATION_PROMPT.format(
+            question=question,
+            module_name=module_name,
+            answer=answer
+        )
         
         evaluation_response = self.llm.invoke([HumanMessage(content=evaluation_prompt)])
         evaluation = evaluation_response.content.strip().upper()
@@ -295,42 +341,20 @@ Respond with either "SUFFICIENT" or "NEEDS_WEB_SEARCH" followed by a brief expla
         
         if web_results and "No additional web information found" not in web_results:
             # Combine initial answer with web search results
-            prompt = f"""
-You have an initial answer and additional web search results. Create a comprehensive final answer.
-
-User Question: {question}
-
-Initial Answer:
-{initial_answer}
-
-Additional Web Information:
-{web_results}
-
-Package Info:
-{module_info}
-
-Recent Error (if any):
-{traceback}
-
-Context Object:
-{context_summary}
-
-Please create a comprehensive final answer that:
-1. Incorporates the best information from both sources
-2. Provides clear, actionable guidance
-3. Includes relevant examples and best practices
-4. Addresses the user's question completely
-"""
+            prompt = FINAL_RESPONSE_WITH_WEB_PROMPT.format(
+                question=question,
+                initial_answer=initial_answer,
+                web_results=web_results,
+                module_info=module_info,
+                traceback=traceback,
+                context_summary=context_summary
+            )
         else:
             # Use the initial answer as the final answer
-            prompt = f"""
-The initial answer is sufficient. Please format it nicely for the user.
-
-User Question: {question}
-
-Answer:
-{initial_answer}
-"""
+            prompt = FINAL_RESPONSE_WITHOUT_WEB_PROMPT.format(
+                question=question,
+                initial_answer=initial_answer
+            )
         
         final_response = self.llm.invoke([HumanMessage(content=prompt)])
         
