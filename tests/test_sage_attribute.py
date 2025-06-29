@@ -1,5 +1,5 @@
 import pytest
-from sagely.import_hook import install_hook
+from sagely.import_hook import install_hook, SageHelper
 from sagely.agent import SageAgent
 
 
@@ -14,9 +14,11 @@ def test_sage_attribute_injection():
     # Import a module
     import math
     
-    # Check that the .sage attribute exists and is callable
+    # Check that the .sage attribute exists and has an ask method
     assert hasattr(math, 'sage')
-    assert callable(math.sage)
+    assert isinstance(math.sage, SageHelper)
+    assert hasattr(math.sage, 'ask')
+    assert callable(math.sage.ask)
 
 
 def test_sage_attribute_not_injected_to_sagely():
@@ -39,9 +41,11 @@ def test_sage_attribute_functionality():
     # Import a module
     import math
     
-    # The .sage attribute should be callable
-    ask_function = math.sage
-    assert callable(ask_function)
+    # The .sage attribute should be a SageHelper object with an ask method
+    sage_helper = math.sage
+    assert isinstance(sage_helper, SageHelper)
+    assert hasattr(sage_helper, 'ask')
+    assert callable(sage_helper.ask)
     
-    # Test that the function can be called (though it may fail without proper setup)
-    assert hasattr(ask_function, '__call__') 
+    # Test that the ask method can be called (though it may fail without proper setup)
+    assert hasattr(sage_helper.ask, '__call__') 

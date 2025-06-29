@@ -58,4 +58,28 @@ def test_cache_functionality():
     assert result == "test answer"
     # Test non-existent cache entry
     result = cache.get("test_module", "non-existent question")
-    assert result is None 
+    assert result is None
+
+def test_ask_function_call(monkeypatch):
+    """Test that the ask function call works correctly with mocked OpenAI client."""
+    mock_openai_client(monkeypatch)()
+    
+    # Clear the cache to ensure we start fresh
+    import shutil
+    import os
+    cache_dir = os.path.expanduser("~/.sage/cache")
+    if os.path.exists(cache_dir):
+        shutil.rmtree(cache_dir)
+    
+    # Create agent and test ask function
+    agent = SageAgent()
+    
+    # Test the ask method with a simple question
+    response = agent.ask("math", "What is the square root function?")
+    
+    # Verify the response contains the expected content from mock
+    assert "sqrt is a mathematical function" in response
+    
+    # Test with different module and question
+    response2 = agent.ask("numpy", "How to create an array?")
+    assert "sqrt is a mathematical function" in response2  # Same mock response 

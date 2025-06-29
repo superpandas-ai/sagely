@@ -3,10 +3,19 @@ import types
 from typing import Any
 
 
+class SageHelper:
+    """Helper class that provides the .ask() method for modules."""
+    def __init__(self, agent, module_name):
+        self.agent = agent
+        self.module_name = module_name
+    
+    def ask(self, question, context_obj=None):
+        return self.agent.ask(self.module_name, question, context_obj)
+
+
 def make_sage_function(agent, module_name):
-    def ask(question, context_obj=None):
-        return agent.ask(module_name, question, context_obj)
-    return ask
+    """Create a SageHelper object for a module."""
+    return SageHelper(agent, module_name)
 
 
 def install_hook(agent):
@@ -23,6 +32,11 @@ def install_hook(agent):
         
         # Don't modify built-in modules
         if module_name in sys.builtin_module_names:
+            return
+        
+        # Skip private or deprecated modules (e.g., numpy.core, numpy.fft.helper, numpy.linalg.linalg)
+        private_suffixes = ('.core', '.helper', '.linalg')
+        if '._' in module_name or module_name.endswith(private_suffixes):
             return
         
         # Add sage attribute if it doesn't exist
