@@ -3,13 +3,13 @@ requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sage"
-version = "0.0.1"
+name = "sagely"
+version = "0.0.2"
 description = "LLM assistant for Python packages in REPLs and notebooks"
 readme = "README.md"
 license = "MIT"
 authors = [
-    {name = "SuperPandas Ltd", email = "sage@superpandas.ai"}
+    {name = "SuperPandas Ltd", email = "sagely@superpandas.ai"}
 ]
 keywords = ["llm", "ai", "assistant", "repl", "jupyter", "ipython", "documentation"]
 classifiers = [
@@ -47,13 +47,13 @@ dev = [
 ]
 
 [project.scripts]
-sage = "sage.agent:SageAgent"
+sagely = "sagely.agent:SageAgent"
 
 [project.urls]
-Homepage = "https://github.com/superpandas-ai/sage"
-Repository = "https://github.com/superpandas-ai/sage"
-Issues = "https://github.com/superpandas-ai/sage/issues"
-Documentation = "https://github.com/superpandas-ai/sage#readme"
+Homepage = "https://github.com/superpandas-ai/sagely"
+Repository = "https://github.com/superpandas-ai/sagely"
+Issues = "https://github.com/superpandas-ai/sagely/issues"
+Documentation = "https://github.com/superpandas-ai/sagely#readme"
 
 [tool.setuptools.packages.find]
 where = ["src"]

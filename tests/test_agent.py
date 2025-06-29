@@ -1,5 +1,5 @@
 import pytest
-from sage.agent import SageAgent
+from sagely.agent import SageAgent
 
 def mock_openai_client(monkeypatch):
     class MockChoices:
@@ -38,7 +38,7 @@ def test_caching(monkeypatch):
     assert "📦 Cached Answer" in response2
 
 def test_display():
-    from sage.widgets import display_with_highlight
+    from sagely.widgets import display_with_highlight
     text = "def hello():\n    return 'hi'"
     result = display_with_highlight(text)
     assert "hello" in result
@@ -50,7 +50,7 @@ def test_agent_creation():
     assert hasattr(agent, 'cache')
 
 def test_cache_functionality():
-    from sage.cache import ResponseCache
+    from sagely.cache import ResponseCache
     cache = ResponseCache()
     # Test setting and getting
     cache.set("test_module", "test question", "test answer")

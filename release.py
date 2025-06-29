@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Release script for the Sage package.
+Release script for the sagely package.
 This script helps prepare and upload the package to PyPI.
 """
 
@@ -22,7 +22,7 @@ def run_command(cmd, check=True):
 def clean_build():
     """Clean build artifacts."""
     print("Cleaning build artifacts...")
-    dirs_to_clean = ['build', 'dist', 'src/sage.egg-info']
+    dirs_to_clean = ['build', 'dist', 'src/sagely.egg-info']
     for dir_name in dirs_to_clean:
         if os.path.exists(dir_name):
             shutil.rmtree(dir_name)

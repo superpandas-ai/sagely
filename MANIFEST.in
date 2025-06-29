@@ -1,4 +1,4 @@
 include README.md
 include LICENSE.md
 include pyproject.toml
-recursive-include src/sage *.py 
+recursive-include src/sagely *.py 

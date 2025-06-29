@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/superpandas-ai/superpython/main/assets/banner.png" alt="Sage Agent Banner" width="100%" />
+  <img src="https://raw.githubusercontent.com/superpandas-ai/sagely/main/assets/banner.png" alt="sagely Agent Banner" width="100%" />
 </p>
 
 <p align="center">
@@ -8,22 +8,22 @@
 </p>
 
 <p align="center">
-  <a href="https://pypi.org/project/sage/">
-    <img src="https://img.shields.io/pypi/v/sage.svg?color=blue" alt="PyPI version">
+  <a href="https://pypi.org/project/sagely/">
+    <img src="https://img.shields.io/pypi/v/sagely.svg?color=blue" alt="PyPI version">
   </a>
-  <a href="https://github.com/superpandas-ai/sage/actions">
-    <img src="https://github.com/superpandas-ai/sage/workflows/Tests/badge.svg" alt="CI Status">
+  <a href="https://github.com/superpandas-ai/sagely/actions">
+    <img src="https://github.com/superpandas-ai/sagely/workflows/Tests/badge.svg" alt="CI Status">
   </a>
-  <a href="https://github.com/superpandas-ai/sage">
-    <img src="https://img.shields.io/github/stars/superpandas-ai/sage?style=social" alt="GitHub stars">
+  <a href="https://github.com/superpandas-ai/sagely">
+    <img src="https://img.shields.io/github/stars/superpandas-ai/sagely?style=social" alt="GitHub stars">
   </a>
 </p>
 
 ---
 
-# 🧠 Sage Agent
+# 🧠 sagely Agent
 
-Sage Agent automatically injects a `.sage` assistant into every package you import. Ask questions about the library you're using, get help with errors, and explore code with syntax-highlighted answers — all powered by an LLM.
+sagely Agent automatically injects a `.sage` assistant into every package you import. Ask questions about the library you're using, get help with errors, and explore code with syntax-highlighted answers — all powered by an LLM.
 
 ---
 
@@ -31,15 +31,15 @@ Sage Agent automatically injects a `.sage` assistant into every package you impo
 
 > _(Click to view full video)_
 
-https://github.com/superpandas-ai/sage/assets/demo.gif  
+https://github.com/superpandas-ai/sagely/assets/demo.gif  
 _or_  
-https://loom.com/share/sage-demo-link
+https://loom.com/share/sagely-demo-link
 
 ---
 
-## ❓ Why Sage?
+## ❓ Why sagely?
 
-There are thousands of Python libraries, but their docs aren't always intuitive. Sage fills that gap:
+There are thousands of Python libraries, but their docs aren't always intuitive. sagely fills that gap:
 
 - You don't need to search Stack Overflow every time you forget a method.
 - You get context-aware help, including recent exceptions and object summaries.
@@ -49,12 +49,12 @@ There are thousands of Python libraries, but their docs aren't always intuitive.
 
 ## ✨ Features
 
-- 💬 Ask any module `.sage.ask("How do I do X?")`
+- �� Ask any module `.sage.ask("How do I do X?")`
 - 💡 Smart context: recent errors + object summaries
 - 🧩 Auto-attaches to every import
 - 💾 Caches answers to avoid repeated API calls
 - 🎨 Syntax-highlighted output with `pygments`
-- 🧠 IPython magic: `%sage pandas how to merge?`
+- 🧠 IPython magic: `%sagely pandas how to merge?`
 
 ---
 
@@ -63,12 +63,12 @@ There are thousands of Python libraries, but their docs aren't always intuitive.
 ### 1. Install
 
 ```bash
-pip install sage
+pip install sagely
 ```
 
 ### 2. Import It
 ```python
-import sage
+import sagely
 ```
 It hooks into all future imports.
 
@@ -82,14 +82,14 @@ matplotlib.sage.ask("how to make a scatter plot?")
 
 ### In Jupyter / IPython
 ```python
-%load_ext sage
+%load_ext sagely
 
-%sage numpy how to generate random numbers?
+%sagely numpy how to generate random numbers?
 ```
 
 ### Programmatic
 ```python
-from sage import agent
+from sagely import agent
 
 agent.ask("requests", "how do I send a POST request?")
 ```
@@ -104,8 +104,8 @@ agent.ask("requests", "how do I send a POST request?")
 
 ## 🧠 Project Structure
 ```text
-sage/
-├── src/sage/
+sagely/
+├── src/sagely/
 │   ├── agent.py
 │   ├── cache.py
 │   ├── context.py
@@ -120,7 +120,7 @@ sage/
 ```
 
 ## 🤝 Contributing
-Sage is early-stage — PRs and ideas welcome!
+sagely is early-stage — PRs and ideas welcome!
 
 - Want to support other LLMs?
 - Want advanced caching or error tracing?
