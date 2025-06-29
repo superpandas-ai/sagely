@@ -1,7 +1,7 @@
 import pytest
 from sagely.sage_agent import SageAgent
-from sagely.langgraph_agent import LangGraphAgent, create_agent, analyze_module, get_error_context
-from unittest.mock import Mock
+from sagely.langgraph_agent import LangGraphAgent, create_agent, analyze_module, get_error_context, web_search
+from unittest.mock import Mock, patch
 from langchain_core.messages import AIMessage
 
 def mock_openai_client(monkeypatch):
@@ -100,6 +100,23 @@ def test_get_error_context_tool():
     result = get_error_context.invoke({})
     assert isinstance(result, str)
 
+def test_web_search_tool():
+    """Test the web_search tool."""
+    with patch('requests.get') as mock_get:
+        # Mock a successful response
+        mock_response = Mock()
+        mock_response.json.return_value = {
+            "Abstract": "Python is a programming language",
+            "Answer": "Python is great for data science",
+            "RelatedTopics": [{"Text": "Python programming"}]
+        }
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+        
+        result = web_search.invoke({"query": "python programming"})
+        assert isinstance(result, str)
+        assert "Python is a programming language" in result
+
 def test_langgraph_agent_initialization():
     """Test LangGraph agent initialization."""
     agent = LangGraphAgent()
@@ -111,4 +128,20 @@ def test_agent_state_structure():
     """Test that the agent has the expected state structure."""
     agent = LangGraphAgent()
     # The graph should be compiled and ready to use
-    assert hasattr(agent.graph, 'invoke') 
+    assert hasattr(agent.graph, 'invoke')
+
+def test_enhanced_workflow_nodes():
+    """Test that the enhanced workflow has all the expected nodes."""
+    agent = LangGraphAgent()
+    # Check that the graph has the expected nodes
+    nodes = agent.graph.nodes
+    expected_nodes = ["analyze_context", "generate_response", "orchestrator", 
+                     "web_search_tool", "generate_final_response"]
+    for node in expected_nodes:
+        assert node in nodes
+
+def test_conditional_edges():
+    """Test that the conditional edges are properly set up."""
+    agent = LangGraphAgent()
+    # The orchestrator should have conditional edges
+    assert hasattr(agent, '_should_use_web_search') 
