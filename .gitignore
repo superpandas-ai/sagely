@@ -7,3 +7,12 @@ __pycache__/
 *.pywz
 *.pyzw
 *.pyzwz
+dist/
+build/
+*.egg-info/
+*.egg
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz

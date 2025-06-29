@@ -1,6 +1,6 @@
-# Sage Package Release Guide
+# sagely Package Release Guide
 
-This guide explains how to prepare and release the Sage package to PyPI.
+This guide explains how to prepare and release the sagely package to PyPI.
 
 ## Prerequisites
 
@@ -13,11 +13,11 @@ This guide explains how to prepare and release the Sage package to PyPI.
 
 ## Package Structure
 
-The Sage package uses a modern Python packaging structure:
+The sagely package uses a modern Python packaging structure:
 
 ```
-sage/
-├── src/sage/           # Source code
+sagely/
+├── src/sagely/           # Source code
 ├── tests/              # Test files
 ├── pyproject.toml      # Package configuration
 ├── MANIFEST.in         # Files to include in distribution
@@ -35,7 +35,7 @@ Before releasing, update the version in `pyproject.toml`:
 
 ```toml
 [project]
-name = "sage"
+name = "sagely"
 version = "0.0.2"  # Increment this
 ```
 
@@ -65,8 +65,8 @@ python release.py check
 Test that the built package can be installed:
 
 ```bash
-pip install dist/sage-0.0.1-py3-none-any.whl --force-reinstall
-python -c "import sage; print('Success!')"
+pip install dist/sagely-0.0.1-py3-none-any.whl --force-reinstall
+python -c "import sagely; print('Success!')"
 ```
 
 ### 5. Upload to TestPyPI (Recommended)
@@ -95,7 +95,7 @@ If you prefer to run commands manually:
 
 ```bash
 # Clean build artifacts
-rm -rf build/ dist/ src/sage.egg-info/
+rm -rf build/ dist/ src/sagely.egg-info/
 
 # Build package
 python -m build
@@ -115,7 +115,7 @@ python -m twine upload dist/*
 The package is configured in `pyproject.toml` with:
 
 - **Modern packaging**: Uses `pyproject.toml` instead of `setup.py`
-- **Source layout**: Code is in `src/sage/` for better isolation
+- **Source layout**: Code is in `src/sagely/` for better isolation
 - **Dependencies**: All required packages with version constraints
 - **Metadata**: Complete package information for PyPI
 - **License**: MIT license using SPDX format
@@ -135,7 +135,7 @@ The package is configured in `pyproject.toml` with:
    - `MANIFEST.in`
    - `LICENSE.md`
    - `README.md`
-   - All Python files in `src/sage/`
+   - All Python files in `src/sagely/`
 
 3. **Upload Errors**: Ensure you have the correct credentials and permissions
 

@@ -3,30 +3,14 @@ import types
 from typing import Any
 
 
-class SageAttribute:
-    """Descriptor that provides the sage.ask functionality."""
-    
-    def __init__(self, agent):
-        self.agent = agent
-    
-    def __get__(self, obj, objtype=None):
-        if obj is None:
-            return self
-        
-        # Get the module name from the object
-        module_name = getattr(obj, '__name__', None)
-        if module_name is None:
-            return self
-        
-        # Return a callable that can ask questions
-        def ask(question, context_obj=None):
-            return self.agent.ask(module_name, question, context_obj)
-        
-        return ask
+def make_sage_function(agent, module_name):
+    def ask(question, context_obj=None):
+        return agent.ask(module_name, question, context_obj)
+    return ask
 
 
 def install_hook(agent):
-    """Install the Sage import hook by adding sage attribute to modules."""
+    """Install the sage import hook by adding sage attribute to modules."""
     
     def add_sage_to_module(module_name, module):
         """Add sage attribute to a module."""
@@ -34,7 +18,7 @@ def install_hook(agent):
             return
         
         # Don't modify our own modules
-        if module_name.startswith('sage'):
+        if module_name.startswith('sagely'):
             return
         
         # Don't modify built-in modules
@@ -43,7 +27,7 @@ def install_hook(agent):
         
         # Add sage attribute if it doesn't exist
         if not hasattr(module, 'sage'):
-            module.sage = SageAttribute(agent)
+            module.sage = make_sage_function(agent, module_name)
     
     # Add sage to existing modules
     for module_name, module in sys.modules.items():
@@ -65,7 +49,7 @@ def install_hook(agent):
 
 
 def uninstall_hook():
-    """Uninstall the Sage import hook."""
+    """Uninstall the sage import hook."""
     # This would need to restore the original __import__ and remove sage attributes
     # For now, just a placeholder
     pass 
