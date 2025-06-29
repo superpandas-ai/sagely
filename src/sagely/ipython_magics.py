@@ -18,7 +18,7 @@ def load_ipython_extension(ipython):
                 return
             module_name = parts[0]
             question = ' '.join(parts[1:])
-            from sagely.agent import SageAgent
+            from sagely.sage_agent import SageAgent
             agent = SageAgent()
             return agent.ask(module_name, question)
         register_line_magic(sage_magic)

@@ -1,5 +1,5 @@
 import pytest
-from sagely.agent import SageAgent
+from sagely.sage_agent import SageAgent
 
 def mock_openai_client(monkeypatch):
     class MockChoices:

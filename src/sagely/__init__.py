@@ -1,9 +1,9 @@
-from .agent import SageAgent
+from .sage_agent import SageAgent
 from .ipython_magics import load_ipython_extension
 from .import_hook import install_hook
 
-agent = SageAgent()
+sage_agent = SageAgent()
 
-install_hook(agent)
+install_hook(sage_agent)
 
-__all__ = ["agent", "load_ipython_extension"] 
+__all__ = ["sage_agent", "load_ipython_extension"] 

@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 def test_imports():
     """Test that all modules can be imported."""
-    from sagely import agent
+    from sagely import sage_agent
     from sagely.cache import ResponseCache
     from sagely.context import get_recent_traceback, summarize_object
     from sagely.widgets import display_with_highlight
@@ -21,7 +21,7 @@ def test_imports():
 
 def test_agent_creation():
     """Test that the agent can be created."""
-    from sagely.agent import SageAgent
+    from sagely.sage_agent import SageAgent
     agent = SageAgent()
     assert agent is not None
     assert hasattr(agent, 'ask')

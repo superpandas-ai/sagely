@@ -1,6 +1,6 @@
 import pytest
 from sagely.import_hook import install_hook, SageHelper
-from sagely.agent import SageAgent
+from sagely.sage_agent import SageAgent
 
 
 def test_sage_attribute_injection():
