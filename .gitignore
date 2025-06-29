@@ -1,4 +1,7 @@
 __pycache__/
+src/sagely/__pycache__/
+src/sagely/tests/__pycache__/
+.pytest_cache/
 *.pyc
 *.pyo
 *.pyd
