@@ -25,7 +25,7 @@ reset_config()
 ```
 
 ### Available Configuration Options
-- `model_name`: LLM model to use (default: "gpt-4")
+- `model_name`: LLM model to use (default: "gpt-4.1-mini")
 - `show_status_updates`: Show status outputs (default: True)
 - `enable_response_cache`: Enable/disable response caching (default: True)
 - `enable_module_cache`: Enable/disable module info caching (default: True)
@@ -62,7 +62,7 @@ You can also configure Sagely using environment variables:
 
 Example:
 ```bash
-export SAGELY_MODEL=gpt-4
+export SAGELY_MODEL=gpt-4.1-mini
 export SAGELY_SHOW_STATUS=false
 export SAGELY_ENABLE_WEB_SEARCH=false
 export SAGELY_WEB_SEARCH_TIMEOUT=15
@@ -193,7 +193,7 @@ Real-time feedback throughout the workflow execution with categorized status mes
 from sagely.langgraph_agent import create_agent
 
 # Create an enhanced agent
-agent = create_agent("gpt-4")
+agent = create_agent("gpt-4.1-mini")
 
 # Ask a question (agent will automatically decide if web search is needed)
 response = agent.ask("numpy", "How do I create a 2D array?")
@@ -309,7 +309,7 @@ The `SageAgent` class has been updated to use the enhanced `LangGraphAgent` inte
 from sagely import SageAgent
 
 # Create SageAgent (now uses enhanced LangGraph internally)
-sage = SageAgent("gpt-4")
+sage = SageAgent("gpt-4.1-mini")
 
 # Use as before - now with automatic web search when needed
 response = sage.ask("numpy", "What are the latest memory optimization techniques?")

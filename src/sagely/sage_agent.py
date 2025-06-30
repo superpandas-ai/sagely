@@ -5,7 +5,7 @@ from .langgraph_agent import LangGraphAgent
 from .config import get_config, print_status
 
 class SageAgent:
-    def __init__(self, model_name: str = "gpt-4"):
+    def __init__(self, model_name: str = "gpt-4.1-mini"):
         config = get_config()
         if config.show_status_updates:
             print_status(f"Initializing SageAgent with model: {model_name}", "info")

@@ -19,7 +19,7 @@ class SagelyConfig:
     """Configuration class for Sagely settings."""
     
     # Model configuration
-    model_name: str = "gpt-4"
+    model_name: str = "gpt-4.1-mini"
     
     # Display configuration
     show_status_updates: bool = True

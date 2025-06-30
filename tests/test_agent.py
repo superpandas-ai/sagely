@@ -12,7 +12,7 @@ def mock_openai_client(monkeypatch):
     # Mock the ChatOpenAI class
     mock_llm = Mock()
     mock_llm.invoke.return_value = mock_response
-    mock_llm.model_name = "gpt-4"
+    mock_llm.model_name = "gpt-4.1-mini"
     
     # Patch the ChatOpenAI import in the agent module
     monkeypatch.setattr("sagely.langgraph_agent.ChatOpenAI", lambda *args, **kwargs: mock_llm)
@@ -85,9 +85,9 @@ def test_ask_function_call(monkeypatch):
 
 def test_create_agent():
     """Test that we can create a LangGraph agent."""
-    agent = create_agent("gpt-4")
+    agent = create_agent("gpt-4.1-mini")
     assert isinstance(agent, LangGraphAgent)
-    assert agent.llm.model_name == "gpt-4"
+    assert agent.llm.model_name == "gpt-4.1-mini"
 
 def test_analyze_module_tool():
     """Test the analyze_module tool."""

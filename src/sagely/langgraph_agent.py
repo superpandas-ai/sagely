@@ -196,7 +196,7 @@ class AgentState(TypedDict):
 class LangGraphAgent:
     """A simple LangGraph agent for handling Python package queries."""
     
-    def __init__(self, model_name: str = "gpt-4"):
+    def __init__(self, model_name: str = "gpt-4.1-mini"):
         config = get_config()
         if config.show_status_updates:
             print_status(f"Initializing LangGraph agent with model: {model_name}", "info")
@@ -620,6 +620,6 @@ class LangGraphAgent:
 
 
 # Convenience function to create an agent instance
-def create_agent(model_name: str = "gpt-4") -> LangGraphAgent:
+def create_agent(model_name: str = "gpt-4.1-mini") -> LangGraphAgent:
     """Create a new LangGraph agent instance."""
     return LangGraphAgent(model_name) 

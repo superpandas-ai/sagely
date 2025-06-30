@@ -57,7 +57,7 @@ def get_error_context() -> str:
 class LangGraphAgent:
     """A simple LangGraph agent for handling Python package queries."""
     
-    def __init__(self, model_name: str = "gpt-4"):
+    def __init__(self, model_name: str = "gpt-4.1-mini"):
         self.llm = ChatOpenAI(model=model_name)
         self.cache = ResponseCache()
         self.graph = self._build_graph()
@@ -176,7 +176,7 @@ User Question:
 
 
 # Convenience function to create an agent instance
-def create_agent(model_name: str = "gpt-4") -> LangGraphAgent:
+def create_agent(model_name: str = "gpt-4.1-mini") -> LangGraphAgent:
     """Create a new LangGraph agent instance."""
     return LangGraphAgent(model_name)
 ```
@@ -243,7 +243,7 @@ from .widgets import display_with_highlight
 from .agent import LangGraphAgent
 
 class SageAgent:
-    def __init__(self, model_name: str = "gpt-4"):
+    def __init__(self, model_name: str = "gpt-4.1-mini"):
         self.cache = ResponseCache()
         self.client = openai.OpenAI()
         self.langgraph_agent = LangGraphAgent(model_name)
@@ -279,9 +279,9 @@ from sagely.agent import LangGraphAgent, create_agent, analyze_module, get_error
 
 def test_create_agent():
     """Test that we can create a LangGraph agent."""
-    agent = create_agent("gpt-4")
+    agent = create_agent("gpt-4.1-mini")
     assert isinstance(agent, LangGraphAgent)
-    assert agent.llm.model_name == "gpt-4"
+    assert agent.llm.model_name == "gpt-4.1-mini"
 
 
 def test_analyze_module_tool():
@@ -325,7 +325,7 @@ from sagely.agent import LangGraphAgent, create_agent
 
 def main():
     # Create a LangGraph agent
-    agent = create_agent("gpt-4")
+    agent = create_agent("gpt-4.1-mini")
     
     # Example 1: Ask about a standard library module
     print("=== Example 1: Asking about 'math' module ===")
@@ -400,7 +400,7 @@ Responses are automatically cached using the existing `ResponseCache` system.
 from sagely.agent import create_agent
 
 # Create an agent
-agent = create_agent("gpt-4")
+agent = create_agent("gpt-4.1-mini")
 
 # Ask a question
 response = agent.ask("numpy", "How do I create a 2D array?")
@@ -468,7 +468,7 @@ The `SageAgent` class has been updated to use the `LangGraphAgent` internally:
 from sagely import SageAgent
 
 # Create SageAgent (now uses LangGraph internally)
-sage = SageAgent("gpt-4")
+sage = SageAgent("gpt-4.1-mini")
 
 # Use as before
 response = sage.ask("numpy", "How do I create an array?")
@@ -606,7 +606,7 @@ class AgentState(TypedDict):
 class LangGraphAgent:
     """A simple LangGraph agent for handling Python package queries."""
     
-    def __init__(self, model_name: str = "gpt-4"):
+    def __init__(self, model_name: str = "gpt-4.1-mini"):
         self.llm = ChatOpenAI(model=model_name)
         self.cache = ResponseCache()
         self.graph = self._build_graph()
@@ -726,7 +726,7 @@ User Question:
 
 
 # Convenience function to create an agent instance
-def create_agent(model_name: str = "gpt-4") -> LangGraphAgent:
+def create_agent(model_name: str = "gpt-4.1-mini") -> LangGraphAgent:
     """Create a new LangGraph agent instance."""
     return LangGraphAgent(model_name)
 ```
@@ -755,7 +755,7 @@ def mock_openai_client(monkeypatch):
     # Mock the ChatOpenAI class
     mock_llm = Mock()
     mock_llm.invoke.return_value = mock_response
-    mock_llm.model_name = "gpt-4"
+    mock_llm.model_name = "gpt-4.1-mini"
     
     # Patch the ChatOpenAI import in the agent module
     monkeypatch.setattr("sagely.agent.ChatOpenAI", lambda *args, **kwargs: mock_llm)
@@ -924,7 +924,7 @@ class AgentState(TypedDict):
 class LangGraphAgent:
     """A simple LangGraph agent for handling Python package queries."""
     
-    def __init__(self, model_name: str = "gpt-4"):
+    def __init__(self, model_name: str = "gpt-4.1-mini"):
         self.llm = ChatOpenAI(model=model_name)
         self.cache = ResponseCache()
         self.graph = self._build_graph()
@@ -1219,7 +1219,7 @@ Answer:
 
 
 # Convenience function to create an agent instance
-def create_agent(model_name: str = "gpt-4") -> LangGraphAgent:
+def create_agent(model_name: str = "gpt-4.1-mini") -> LangGraphAgent:
     """Create a new LangGraph agent instance."""
     return LangGraphAgent(model_name)
 ```
@@ -1292,7 +1292,7 @@ def mock_openai_client(monkeypatch):
     # Mock the ChatOpenAI class
     mock_llm = Mock()
     mock_llm.invoke.return_value = mock_response
-    mock_llm.model_name = "gpt-4"
+    mock_llm.model_name = "gpt-4.1-mini"
     
     # Patch the ChatOpenAI import in the agent module
     monkeypatch.setattr("sagely.langgraph_agent.ChatOpenAI", lambda *args, **kwargs: mock_llm)
@@ -1365,9 +1365,9 @@ def test_ask_function_call(monkeypatch):
 
 def test_create_agent():
     """Test that we can create a LangGraph agent."""
-    agent = create_agent("gpt-4")
+    agent = create_agent("gpt-4.1-mini")
     assert isinstance(agent, LangGraphAgent)
-    assert agent.llm.model_name == "gpt-4"
+    assert agent.llm.model_name == "gpt-4.1-mini"
 
 def test_analyze_module_tool():
     """Test the analyze_module tool."""
@@ -1456,7 +1456,7 @@ from sagely.langgraph_agent import LangGraphAgent, create_agent, web_search
 
 def main():
     # Create an enhanced LangGraph agent
-    agent = create_agent("gpt-4")
+    agent = create_agent("gpt-4.1-mini")
     
     print("=== Enhanced LangGraph Agent with Web Search ===\n")
     
@@ -1564,7 +1564,7 @@ Responses are automatically cached using the existing `ResponseCache` system.
 from sagely.langgraph_agent import create_agent
 
 # Create an enhanced agent
-agent = create_agent("gpt-4")
+agent = create_agent("gpt-4.1-mini")
 
 # Ask a question (agent will automatically decide if web search is needed)
 response = agent.ask("numpy", "How do I create a 2D array?")
@@ -1659,7 +1659,7 @@ The `SageAgent` class has been updated to use the enhanced `LangGraphAgent` inte
 from sagely import SageAgent
 
 # Create SageAgent (now uses enhanced LangGraph internally)
-sage = SageAgent("gpt-4")
+sage = SageAgent("gpt-4.1-mini")
 
 # Use as before - now with automatic web search when needed
 response = sage.ask("numpy", "What are the latest memory optimization techniques?")

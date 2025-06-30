@@ -78,7 +78,7 @@ Demonstrates the persistent configuration system:
 - Internet connection (for web search examples)
 - OpenAI API key set as environment variable (`OPENAI_API_KEY`)
 
-> **Note**: Sagely currently uses OpenAI's models (GPT-4 by default), so you must have your OpenAI API key set in the environment:
+> **Note**: Sagely currently uses OpenAI's models (gpt-4.1-mini by default), so you must have your OpenAI API key set in the environment:
 > ```bash
 > export OPENAI_API_KEY='your-api-key-here'
 > ```

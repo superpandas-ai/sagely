@@ -77,7 +77,7 @@ pip install sagely
 ```bash
 export OPENAI_API_KEY='your-api-key-here'
 ```
-> **Note**: Sagely currently uses OpenAI's models (GPT-4 by default), so you must have your OpenAI API key set in the environment.
+> **Note**: Sagely currently uses OpenAI's models (gpt-4.1-mini by default), so you must have your OpenAI API key set in the environment.
 
 ### 3. Import It
 ```python
@@ -170,7 +170,7 @@ reset_config()
 ```
 
 #### Available Configuration Options
-- `model_name`: LLM model to use (default: "gpt-4")
+- `model_name`: LLM model to use (default: "gpt-4.1-mini")
 - `show_status_updates`: Show status outputs (default: True)
 - `show_line_numbers`: Show line numbers in console display (default: True)
 - `enable_response_cache`: Enable/disable response caching (default: True)
@@ -212,7 +212,7 @@ You can also configure Sagely using environment variables:
 
 Example:
 ```bash
-export SAGELY_MODEL=gpt-4
+export SAGELY_MODEL=gpt-4.1-mini
 export SAGELY_SHOW_STATUS=false
 export SAGELY_SHOW_LINE_NUMBERS=false
 export SAGELY_ENABLE_WEB_SEARCH=true
@@ -265,13 +265,13 @@ sagely.config.web_search_provider = "tavily"
 # Method 2: Programmatic updates
 from sagely.config import update_config
 update_config(
-    model_name="gpt-4",
+    model_name="gpt-4.1-mini",
     show_line_numbers=False,
     enable_web_search=True
 )
 
 # Method 3: Environment variables
-# export SAGELY_MODEL=gpt-4
+# export SAGELY_MODEL=gpt-4.1-mini
 # export SAGELY_WEB_SEARCH_PROVIDER=openai_websearch
 
 # Method 4: Configuration file

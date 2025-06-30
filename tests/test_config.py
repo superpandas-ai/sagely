@@ -6,7 +6,7 @@ from sagely.config import (
 
 def test_default_config_values():
     config = get_config()
-    assert config.model_name == "gpt-4"
+    assert config.model_name == "gpt-4.1-mini"
     assert config.show_status_updates is True
     assert config.enable_response_cache is True
     assert config.enable_module_cache is True
@@ -20,7 +20,7 @@ def test_update_config_and_reinit():
     update_config(model_name="gpt-3.5-turbo", show_status_updates=False)
     assert config.model_name == "gpt-3.5-turbo"
     assert config.show_status_updates is False
-    update_config(model_name="gpt-4", show_status_updates=True)  # reset
+    update_config(model_name="gpt-4.1-mini", show_status_updates=True)  # reset
 
 
 def test_cache_clearing():
