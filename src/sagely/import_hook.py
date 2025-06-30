@@ -10,7 +10,7 @@ class SageHelper:
         self.module_name = module_name
     
     def ask(self, question, context_obj=None):
-        return self.agent.ask(self.module_name, question, context_obj)
+        self.agent.ask(self.module_name, question, context_obj)
 
 
 def make_sage_function(agent, module_name):
