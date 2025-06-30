@@ -1,9 +1,9 @@
-<p align="center">
+<!-- <p align="center">
   <img src="https://raw.githubusercontent.com/superpandas-ai/sagely/main/assets/banner.png" alt="sagely Agent Banner" width="100%" />
-</p>
+</p> -->
 
 <p align="center">
-  <b>LLM-powered assistant for every Python package you import.</b><br/>
+  <b>LLM-powered assistant for every Python package!</b><br/>
   Just add <code>.sage.ask("your question")</code> to any module.
 </p>
 
@@ -11,9 +11,9 @@
   <a href="https://pypi.org/project/sagely/">
     <img src="https://img.shields.io/pypi/v/sagely.svg?color=blue" alt="PyPI version">
   </a>
-  <a href="https://github.com/superpandas-ai/sagely/actions">
+  <!-- <a href="https://github.com/superpandas-ai/sagely/actions">
     <img src="https://github.com/superpandas-ai/sagely/workflows/Tests/badge.svg" alt="CI Status">
-  </a>
+  </a> -->
   <a href="https://github.com/superpandas-ai/sagely">
     <img src="https://img.shields.io/github/stars/superpandas-ai/sagely?style=social" alt="GitHub stars">
   </a>
@@ -21,13 +21,13 @@
 
 ---
 
-# 🧠 sagely Agent
+# 🧠 Sagely Agent
 
-sagely Agent automatically injects a `.sage` assistant into every package you import. Ask questions about the library you're using, get help with errors, and explore code with syntax-highlighted answers — all powered by an LLM.
+Sagely Agent automatically injects a `.sage` assistant into every package you import. Ask questions about the library you're using, get help with errors, and explore code with syntax-highlighted answers — all powered by an LLM.
 
 ---
 
-## 🎥 Demo
+## 🎥 Demo (TODO!)
 
 > _(Click to view full video)_
 
@@ -37,9 +37,9 @@ https://loom.com/share/sagely-demo-link
 
 ---
 
-## ❓ Why sagely?
+## ❓ Why Sagely?
 
-There are thousands of Python libraries, but their docs aren't always intuitive. sagely fills that gap:
+There are thousands of Python libraries, but their docs aren't always intuitive. Moreover, getting help about errors or finding usage requires (atleast) asking an LLM manually. With sagely, you can do all that right from the REPL or the jupyter notebook:
 
 - You don't need to search Stack Overflow every time you forget a method.
 - You get context-aware help, including recent exceptions and object summaries.
@@ -56,7 +56,7 @@ There are thousands of Python libraries, but their docs aren't always intuitive.
 - 📦 Caches module analysis for faster subsequent queries
 - 🎨 Syntax-highlighted output with `rich`
 - 🧠 IPython magic: `%sagely pandas how to merge?`
-- 🔍 **Real-time status updates** showing workflow progress
+- 🔍 **Real-time status updates** showing agent flow progress
 - 🌐 **Web search integration** with multiple providers (OpenAI web-search, Tavily)
 - 📊 **LangSmith tracing** for debugging and monitoring
 - ⚙️ **Centralized configuration system** for customizing agent behavior
@@ -77,13 +77,13 @@ pip install sagely
 ```bash
 export OPENAI_API_KEY='your-api-key-here'
 ```
-> **Note**: Sagely currently uses OpenAI's models (gpt-4.1-mini by default), so you must have your OpenAI API key set in the environment.
+> **Note**: Sagely currently uses OpenAI's models (gpt-4.1-mini by default), so you must have your OpenAI API key set in the environment. Later we plan to introduce other LLM providers.
 
 ### 3. Import It
 ```python
 import sagely
 ```
-It hooks into all future imports.
+It hooks into all future module imports.
 
 ## 🧪 Usage Examples
 ### Inline Python
@@ -209,6 +209,7 @@ You can also configure Sagely using environment variables:
 - `SAGELY_ENABLE_LANGSMITH`
 - `SAGELY_LANGSMITH_PROJECT`
 - `TAVILY_API_KEY` (for Tavily web search)
+- `OPENAI_API_KEY`
 
 Example:
 ```bash
@@ -311,18 +312,24 @@ sagely/
 │   ├── config.py             # Centralized configuration system
 │   └── __init__.py
 ├── tests/
-├── examples/                 # Usage examples
+├── examples/                 # Usage examples in Jupyter notebooks
 ├── pyproject.toml
 ├── MANIFEST.in
 └── README.md
 ```
 
 ## 🤝 Contributing
-sagely is early-stage — PRs and ideas welcome!
+Sagely is early-stage — PRs and ideas welcome!
 
-- Want to support other LLMs?
+We use [Featurebase](https://sagely.featurebase.app/) for product roadmap and feature tracking
+
+- Want to support other LLM Providers?
 - Want advanced caching or error tracing?
 - Want to auto-annotate cells with answers?
+- Better prompts
+- Async & Parallel Context Gathering
+- Streaming Response for Jupyter/REPL
+- Improved context for large modules using RAG/Summarization/Selective Filtering
 
 Open an issue or submit a PR. 💥
 
