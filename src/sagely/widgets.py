@@ -2,9 +2,10 @@ from IPython.display import display, HTML
 from rich.console import Console
 from rich.syntax import Syntax
 from rich.text import Text
+from .config import get_config
 
 
-def display_with_highlight(text, lexer=None):
+def display_with_highlight(text, lexer=None, show_line_numbers=None):
     """
     Display text with syntax highlighting using Rich library.
     
@@ -12,12 +13,19 @@ def display_with_highlight(text, lexer=None):
         text (str): The text to display with highlighting
         lexer (str, optional): The lexer to use for syntax highlighting. 
                               Defaults to "text" if None.
+        show_line_numbers (bool, optional): Whether to show line numbers.
+                                           If None, uses configuration setting.
     
     Returns:
         str: The original text that was displayed
     """
     # Use Rich console for IPython display
     console = Console(force_terminal=True)
+    
+    # Get configuration for line numbers if not specified
+    if show_line_numbers is None:
+        config = get_config()
+        show_line_numbers = config.show_line_numbers
     
     # Determine lexer - map common lexers to Rich syntax names
     if lexer is None:
@@ -46,7 +54,7 @@ def display_with_highlight(text, lexer=None):
         syntax_lexer = str(lexer).lower()
     
     # Create Rich syntax object with highlighting
-    syntax = Syntax(text, syntax_lexer, theme="monokai", line_numbers=True)
+    syntax = Syntax(text, syntax_lexer, theme="monokai", line_numbers=show_line_numbers)
     
     # Display using Rich console
     console.print(syntax)

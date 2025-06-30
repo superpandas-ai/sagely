@@ -130,19 +130,25 @@ def test_get_error_context_tool():
 
 def test_web_search_tool():
     """Test the web_search tool."""
-    with patch('requests.get') as mock_get:
-        # Mock a successful response
-        mock_response = Mock()
-        mock_response.json.return_value = {
-            "Abstract": "Python is a programming language",
-            "Answer": "Python is great for data science",
-            "RelatedTopics": [{"Text": "Python programming"}]
-        }
-        mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
+    with patch('sagely.langgraph_agent.TavilySearch') as mock_tavily:
+        # Mock Tavily search results
+        mock_instance = Mock()
+        mock_instance.invoke.return_value = {"results": [
+            {
+                'title': 'Python Programming Guide',
+                'url': 'https://example.com/python',
+                'content': 'Python is a programming language'
+            }
+        ]}
+        mock_tavily.return_value = mock_instance
+        
+        # Set up config for testing
+        from sagely.config import update_config
+        update_config(tavily_api_key="test_key", enable_web_search=True)
         
         result = web_search.invoke({"query": "python programming"})
         assert isinstance(result, str)
+        assert "Python Programming Guide" in result
         assert "Python is a programming language" in result
 
 def test_langgraph_agent_initialization():

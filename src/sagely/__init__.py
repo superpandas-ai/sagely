@@ -21,7 +21,8 @@ from .config import (
     clear_caches,
     clear_module_cache,
     reset_config,
-    SagelyConfig
+    SagelyConfig,
+    config
 )
 
 # Install the import hook
@@ -47,5 +48,6 @@ __all__ = [
     "clear_caches",
     "clear_module_cache",
     "reset_config",
-    "SagelyConfig"
+    "SagelyConfig",
+    "config"
 ] 

@@ -57,9 +57,11 @@ There are thousands of Python libraries, but their docs aren't always intuitive.
 - 🎨 Syntax-highlighted output with `rich`
 - 🧠 IPython magic: `%sagely pandas how to merge?`
 - 🔍 **Real-time status updates** showing workflow progress
-- 🌐 **Web search integration** for up-to-date information
+- 🌐 **Web search integration** with multiple providers (OpenAI web-search, Tavily)
 - 📊 **LangSmith tracing** for debugging and monitoring
 - ⚙️ **Centralized configuration system** for customizing agent behavior
+- 🎛️ **Direct configuration access** via `sagely.config.attribute = value`
+- 📝 **Configurable line numbers** in console display
 
 ---
 
@@ -133,13 +135,29 @@ The agent provides real-time feedback about what it's doing:
 ### ⚙️ Configuration System
 Sagely provides a centralized configuration system for customizing agent behavior, model selection, cache management, and more.
 
-#### Accessing and Updating Configuration
+#### Direct Configuration Access (Recommended)
+The easiest way to configure Sagely is through direct attribute assignment:
+
+```python
+import sagely
+
+# Direct configuration updates
+sagely.config.enable_module_cache = False
+sagely.config.show_line_numbers = False
+sagely.config.model_name = "gpt-3.5-turbo"
+sagely.config.web_search_provider = "tavily"
+sagely.config.show_status_updates = False
+
+# Changes take effect immediately and affect all future operations
+```
+
+#### Programmatic Configuration
 ```python
 from sagely import get_config, update_config, clear_caches, clear_module_cache, reset_config, SageAgent
 
 # View current configuration
 config = get_config()
-print(config.get_config())
+print(config.to_dict())
 
 # Update configuration (e.g., change model, disable status updates)
 update_config(model_name="gpt-3.5-turbo", show_status_updates=False)
@@ -154,9 +172,11 @@ reset_config()
 #### Available Configuration Options
 - `model_name`: LLM model to use (default: "gpt-4")
 - `show_status_updates`: Show status outputs (default: True)
+- `show_line_numbers`: Show line numbers in console display (default: True)
 - `enable_response_cache`: Enable/disable response caching (default: True)
 - `enable_module_cache`: Enable/disable module info caching (default: True)
 - `enable_web_search`: Enable/disable web search (default: True)
+- `web_search_provider`: Web search provider ("openai_websearch" or "tavily", default: "openai_websearch")
 - `web_search_timeout`: Timeout for web search requests (default: 10)
 - `enable_langsmith_tracing`: Enable LangSmith tracing (default: False)
 - `langsmith_project`: LangSmith project name (default: None)
@@ -180,29 +200,96 @@ clear_module_cache("json")
 You can also configure Sagely using environment variables:
 - `SAGELY_MODEL`
 - `SAGELY_SHOW_STATUS`
+- `SAGELY_SHOW_LINE_NUMBERS`
 - `SAGELY_ENABLE_RESPONSE_CACHE`
 - `SAGELY_ENABLE_MODULE_CACHE`
 - `SAGELY_ENABLE_WEB_SEARCH`
+- `SAGELY_WEB_SEARCH_PROVIDER`
 - `SAGELY_WEB_SEARCH_TIMEOUT`
 - `SAGELY_ENABLE_LANGSMITH`
 - `SAGELY_LANGSMITH_PROJECT`
+- `TAVILY_API_KEY` (for Tavily web search)
 
 Example:
 ```bash
 export SAGELY_MODEL=gpt-4
 export SAGELY_SHOW_STATUS=false
-export SAGELY_ENABLE_WEB_SEARCH=false
+export SAGELY_SHOW_LINE_NUMBERS=false
+export SAGELY_ENABLE_WEB_SEARCH=true
+export SAGELY_WEB_SEARCH_PROVIDER=tavily
 export SAGELY_WEB_SEARCH_TIMEOUT=15
+export TAVILY_API_KEY=your-tavily-api-key
 ```
+
+#### Web Search Providers
+Sagely supports multiple web search providers for up-to-date information:
+
+**OpenAI Web Search (Default)**
+- Uses OpenAI's built-in web search tool
+- No additional API key required (uses your OpenAI API key)
+- Set with: `sagely.config.web_search_provider = "openai_websearch"`
+
+**Tavily Search**
+- Uses Tavily's search API for comprehensive web results
+- Requires a Tavily API key: `export TAVILY_API_KEY=your-key`
+- Set with: `sagely.config.web_search_provider = "tavily"`
+
+The agent automatically rebuilds its workflow when you change the web search provider.
+
+#### Configuration Persistence
+Sagely automatically creates a configuration file at `~/.sagely/config.json` on first run with default settings. You can:
+
+```python
+# Save current configuration to file
+from sagely.config import save_config
+save_config()
+
+# Load configuration from file
+from sagely.config import load_config
+load_config()
+```
+
+The configuration file is automatically created with default settings if it doesn't exist.
+
+#### Configuration Examples
+Here are different ways to configure Sagely:
+
+```python
+import sagely
+
+# Method 1: Direct attribute assignment (recommended)
+sagely.config.model_name = "gpt-3.5-turbo"
+sagely.config.show_status_updates = False
+sagely.config.web_search_provider = "tavily"
+
+# Method 2: Programmatic updates
+from sagely.config import update_config
+update_config(
+    model_name="gpt-4",
+    show_line_numbers=False,
+    enable_web_search=True
+)
+
+# Method 3: Environment variables
+# export SAGELY_MODEL=gpt-4
+# export SAGELY_WEB_SEARCH_PROVIDER=openai_websearch
+
+# Method 4: Configuration file
+# Edit ~/.sagely/config.json directly
+```
+
+All methods work together - environment variables are loaded first, then the config file, and direct assignments take precedence.
 
 ## 🔧 Requirements
 - OpenAI API key (set as `OPENAI_API_KEY` environment variable)
+- Tavily API key (optional, for Tavily web search provider)
 - openai
 - ipywidgets
 - rich
 - ipython
 - langgraph
 - langchain-openai
+- langchain-tavily (for Tavily web search)
 - requests
 - langsmith (optional, for tracing)
 

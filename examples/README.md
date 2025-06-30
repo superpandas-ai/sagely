@@ -22,9 +22,10 @@ Explores the enhanced agent with web search functionality:
 ### 3. Configuration System (`config_example.ipynb`)
 Demonstrates how to configure Sagely's behavior, including:
 - Setting model preferences
-- Toggling status updates
+- Toggling status updates and line numbers
 - Managing cache settings
-- Handling web search configuration
+- Configuring web search providers (OpenAI vs Tavily)
+- Direct configuration access via `sagely.config.attribute = value`
 - Using environment variables
 - Resetting to defaults
 
@@ -43,6 +44,15 @@ Shows how the LangGraph agent provides real-time feedback during execution:
 - Cache utilization feedback
 - Module cache operations and status
 
+### 6. Configuration Save/Load (`config_save_load_example.ipynb`)
+Demonstrates the persistent configuration system:
+- Saving configuration to `~/.sage/config.json`
+- Loading configuration from file
+- Automatic loading on startup
+- Global functions for easy access
+- Configuration file management
+- Environment variable override behavior
+
 ## Getting Started
 
 1. Make sure you have Jupyter installed in your environment
@@ -54,7 +64,7 @@ Shows how the LangGraph agent provides real-time feedback during execution:
 
 ## Usage Tips
 
-- Run the notebooks in order (1-5) for the best learning experience
+- Run the notebooks in order (1-6) for the best learning experience
 - Each notebook is self-contained but may reference concepts from earlier notebooks
 - Feel free to modify the examples and experiment with different inputs
 - Pay attention to the markdown cells for explanations and context

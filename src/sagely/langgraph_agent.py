@@ -5,11 +5,13 @@ from langgraph.prebuilt import ToolNode
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.tools import tool
+from langchain_tavily import TavilySearch
 import inspect
 import sys
 import requests
 from urllib.parse import quote_plus
 import re
+import openai
 from .cache import ResponseCache, ModuleInfoCache
 from .context import get_recent_traceback, summarize_object
 from .widgets import display_with_highlight
@@ -143,42 +145,32 @@ def web_search(query: str) -> str:
     if not config.enable_web_search:
         return "Web search is disabled in configuration"
     
+    if not config.tavily_api_key:
+        return "Web search failed: Tavily API key not configured"
+    
     if config.show_status_updates:
         print_status(f"Searching web for: '{query}'", "search")
     try:
-        # Use DuckDuckGo Instant Answer API for web search
-        search_url = f"https://api.duckduckgo.com/?q={quote_plus(query)}&format=json&no_html=1&skip_disambig=1"
-        response = requests.get(search_url, timeout=config.web_search_timeout)
-        response.raise_for_status()
-        
-        data = response.json()
-        
-        # Extract relevant information
-        result = ""
-        
-        if data.get("Abstract"):
-            result += f"Abstract: {data['Abstract']}\n\n"
-        
-        if data.get("Answer"):
-            result += f"Answer: {data['Answer']}\n\n"
-        
-        if data.get("RelatedTopics"):
-            related = data["RelatedTopics"][:3]  # Limit to first 3 related topics
-            result += "Related Topics:\n"
-            for topic in related:
-                if isinstance(topic, dict) and topic.get("Text"):
-                    result += f"- {topic['Text']}\n"
-        
-        if not result.strip():
-            result = f"No specific information found for: {query}"
-            if config.show_status_updates:
-                print_status(f"No web results found for: '{query}'", "warning")
+        search_tool = TavilySearch(api_key=config.tavily_api_key, max_results=5)
+        # Use Tavily API for web search
+        response = search_tool.invoke({"query": query})
+        search_results = response["results"]
+
+        if isinstance(search_results, list) and all(isinstance(result, dict) for result in search_results):
+            formatted_results = ""
+            references = []
+            for i, result in enumerate(search_results):
+                title = result.get('title', 'No Title')
+                url = result.get('url', 'No URL')
+                content = result.get('content', 'No Content')
+                formatted_results += f"{i+1}. {title}\n{content} [^{i+1}]\n\n"
+                references.append(f"[^{i+1}]: [{title}]({url})")
+
+            references_section = "\n**References:**\n" + "\n".join(references)
+            return formatted_results + references_section
         else:
-            if config.show_status_updates:
-                print_status(f"Found web results for: '{query}'", "success")
-        
-        return result
-        
+            return "**References:**\nNo structured results found."
+            
     except Exception as e:
         error_msg = f"Web search failed: {str(e)}"
         if config.show_status_updates:
@@ -208,9 +200,10 @@ class LangGraphAgent:
         config = get_config()
         if config.show_status_updates:
             print_status(f"Initializing LangGraph agent with model: {model_name}", "info")
-        self.llm = ChatOpenAI(model=model_name)
+        self.llm = ChatOpenAI(model=model_name, api_key=config.openai_api_key)
         self.cache = ResponseCache()
         self.module_cache = ModuleInfoCache()
+        self.web_search_provider = config.web_search_provider
         self.graph = self._build_graph()
         if config.show_status_updates:
             print_status("LangGraph agent initialized successfully", "success")
@@ -228,7 +221,13 @@ class LangGraphAgent:
         workflow.add_node("analyze_context", self._analyze_context_node)
         workflow.add_node("generate_response", self._generate_response_node)
         workflow.add_node("orchestrator", self._orchestrator_node)
-        workflow.add_node("web_search_tool", self._web_search_tool_node)
+        
+        # Add web search node based on provider
+        if config.web_search_provider == "openai_websearch":
+            workflow.add_node("web_search_tool", self._web_search_tool_node)
+        else:
+            workflow.add_node("web_search_tool", self._web_search_tool_node)
+            
         workflow.add_node("generate_final_response", self._generate_final_response_node)
         
         # Define the flow
@@ -407,7 +406,13 @@ class LangGraphAgent:
             if config.show_status_updates:
                 print_status(f"Web search {i}/{len(search_queries)}: {query[:50]}...", "search")
             try:
-                result = web_search.invoke({"query": query})
+                if config.web_search_provider == "openai_websearch":
+                    # Use OpenAI web search directly
+                    result = self._openai_web_search(query)
+                else:
+                    # Use Tavily web search
+                    result = web_search.invoke({"query": query})
+                
                 if result and "No specific information found" not in result:
                     web_results.append(f"Search: {query}\n{result}\n")
             except Exception as e:
@@ -435,6 +440,42 @@ class LangGraphAgent:
             "needs_web_search": state["needs_web_search"],
             "final_answer": ""
         }
+    
+    def _openai_web_search(self, query: str) -> str:
+        """Perform web search using OpenAI's web-search tool."""
+        config = get_config()
+        if config.show_status_updates:
+            print_status(f"[OpenAI Web Search] Searching for: {query}", "search")
+
+        try:
+            client = openai.OpenAI()
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "user", "content": query}
+                ],
+                tools=[{
+                    "type": "web_search",
+                }],
+                tool_choice={"type": "tool", "function": {"name": "web-search"}},
+            )
+
+            # Get the tool response from the assistant
+            try:
+                tool_content = response.choices[0].message.tool_calls[0].function.arguments
+                if config.show_status_updates:
+                    print_status("OpenAI web search completed successfully", "success")
+                return tool_content
+            except Exception as e:
+                error_msg = f"[OpenAI Web Search Error] Failed to parse web search result: {str(e)}"
+                if config.show_status_updates:
+                    print_status(error_msg, "error")
+                return error_msg
+        except Exception as e:
+            error_msg = f"[OpenAI Web Search Error] Web search failed: {str(e)}"
+            if config.show_status_updates:
+                print_status(error_msg, "error")
+            return error_msg
     
     def _generate_final_response_node(self, state: AgentState) -> AgentState:
         """Node to generate the final comprehensive response."""
@@ -492,6 +533,9 @@ class LangGraphAgent:
         
         if config.show_status_updates:
             print_status(f"Processing question about '{module_name}': {question[:50]}...", "info")
+        
+        # Check if graph needs to be rebuilt due to web search provider change
+        self.rebuild_graph_if_needed()
         
         # Check cache first
         if use_cache and config.enable_response_cache:
@@ -562,6 +606,17 @@ class LangGraphAgent:
             True if the module info is cached, False otherwise
         """
         return self.module_cache.get(module_name) is not None
+
+    def rebuild_graph_if_needed(self) -> None:
+        """Rebuild the graph if web search provider has changed."""
+        config = get_config()
+        if self.web_search_provider != config.web_search_provider:
+            if config.show_status_updates:
+                print_status(f"Web search provider changed from {self.web_search_provider} to {config.web_search_provider}, rebuilding graph...", "info")
+            self.web_search_provider = config.web_search_provider
+            self.graph = self._build_graph()
+            if config.show_status_updates:
+                print_status("Graph rebuilt successfully", "success")
 
 
 # Convenience function to create an agent instance

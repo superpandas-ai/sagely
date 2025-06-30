@@ -7,7 +7,7 @@ from pathlib import Path
 class ResponseCache:
     def __init__(self, cache_dir=None):
         if cache_dir is None:
-            cache_dir = Path.home() / ".sage" / "cache"
+            cache_dir = Path.home() / ".sagely" / "cache"
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -63,7 +63,7 @@ class ResponseCache:
 class ModuleInfoCache:
     def __init__(self, cache_dir=None):
         if cache_dir is None:
-            cache_dir = Path.home() / ".sage" / "module_cache"
+            cache_dir = Path.home() / ".sagely" / "module_cache"
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
