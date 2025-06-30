@@ -2,6 +2,7 @@ __pycache__/
 src/sagely/__pycache__/
 src/sagely/tests/__pycache__/
 .pytest_cache/
+.ipynb_checkpoints/
 *.pyc
 *.pyo
 *.pyd

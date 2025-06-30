@@ -71,7 +71,13 @@ There are thousands of Python libraries, but their docs aren't always intuitive.
 pip install sagely
 ```
 
-### 2. Import It
+### 2. Set up OpenAI API Key
+```bash
+export OPENAI_API_KEY='your-api-key-here'
+```
+> **Note**: Sagely currently uses OpenAI's models (GPT-4 by default), so you must have your OpenAI API key set in the environment.
+
+### 3. Import It
 ```python
 import sagely
 ```
@@ -190,6 +196,7 @@ export SAGELY_WEB_SEARCH_TIMEOUT=15
 ```
 
 ## 🔧 Requirements
+- OpenAI API key (set as `OPENAI_API_KEY` environment variable)
 - openai
 - ipywidgets
 - rich
