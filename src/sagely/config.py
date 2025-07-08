@@ -342,7 +342,8 @@ def print_status(message: str, status_type: str = "info"):
         "error": "❌",
         "search": "🔍",
         "thinking": "🤔",
-        "cache": "📦"
+        "cache": "📦",
+        "usage": "💰"
     }
     symbol = status_symbols.get(status_type, "ℹ️")
     print(f"{symbol} {message}")

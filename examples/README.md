@@ -53,6 +53,16 @@ Demonstrates the persistent configuration system:
 - Configuration file management
 - Environment variable override behavior
 
+### 7. Token Usage Tracking (`usage_tracking_example.ipynb`)
+Demonstrates the token usage tracking system:
+- Automatic token usage tracking for all LLM requests
+- Session-wide usage statistics with model breakdown
+- Real-time usage display in status updates
+- Detailed breakdown of input, output, and total tokens
+- Request categorization and model identification
+- Model-specific usage tracking and comparison
+- Usage history and recent request details by model
+
 ## Getting Started
 
 1. Make sure you have Jupyter installed in your environment
@@ -64,7 +74,7 @@ Demonstrates the persistent configuration system:
 
 ## Usage Tips
 
-- Run the notebooks in order (1-6) for the best learning experience
+- Run the notebooks in order (1-7) for the best learning experience
 - Each notebook is self-contained but may reference concepts from earlier notebooks
 - Feel free to modify the examples and experiment with different inputs
 - Pay attention to the markdown cells for explanations and context

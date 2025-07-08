@@ -23,6 +23,7 @@ from .prompts import (
     SYSTEM_MESSAGE_TEMPLATE
 )
 from .config import get_config, print_status
+from .usage_info import add_usage
 
 # Global module info cache instance
 _module_info_cache = ModuleInfoCache()
@@ -318,6 +319,13 @@ class LangGraphAgent:
         # Get response from LLM
         response = self.llm.invoke([HumanMessage(content=prompt)])
         
+        # Track token usage
+        if hasattr(response, 'usage_metadata') and response.usage_metadata:
+            add_usage(response.usage_metadata, self.llm.model_name, "initial_response")
+            if config.show_status_updates:
+                usage = response.usage_metadata
+                print_status(f"Tokens used: {usage.get('input_tokens', 0)} input, {usage.get('output_tokens', 0)} output, {usage.get('total_tokens', 0)} total", "usage")
+        
         if config.show_status_updates:
             print_status("Initial response generated", "success")
         
@@ -353,6 +361,14 @@ class LangGraphAgent:
         )
         
         evaluation_response = self.llm.invoke([HumanMessage(content=evaluation_prompt)])
+        
+        # Track token usage
+        if hasattr(evaluation_response, 'usage_metadata') and evaluation_response.usage_metadata:
+            add_usage(evaluation_response.usage_metadata, self.llm.model_name, "orchestrator_evaluation")
+            if config.show_status_updates:
+                usage = evaluation_response.usage_metadata
+                print_status(f"Tokens used: {usage.get('input_tokens', 0)} input, {usage.get('output_tokens', 0)} output, {usage.get('total_tokens', 0)} total", "usage")
+        
         evaluation = evaluation_response.content.strip().upper()
         
         needs_web_search = "NEEDS_WEB_SEARCH" in evaluation
@@ -460,6 +476,17 @@ class LangGraphAgent:
                 tool_choice={"type": "tool", "function": {"name": "web-search"}},
             )
 
+            # Track token usage from OpenAI response
+            if hasattr(response, 'usage') and response.usage:
+                usage_metadata = {
+                    'input_tokens': response.usage.prompt_tokens,
+                    'output_tokens': response.usage.completion_tokens,
+                    'total_tokens': response.usage.total_tokens
+                }
+                add_usage(usage_metadata, "gpt-4o", "openai_web_search")
+                if config.show_status_updates:
+                    print_status(f"Tokens used: {usage_metadata['input_tokens']} input, {usage_metadata['output_tokens']} output, {usage_metadata['total_tokens']} total", "usage")
+
             # Get the tool response from the assistant
             try:
                 tool_content = response.choices[0].message.tool_calls[0].function.arguments
@@ -509,6 +536,13 @@ class LangGraphAgent:
             )
         
         final_response = self.llm.invoke([HumanMessage(content=prompt)])
+        
+        # Track token usage
+        if hasattr(final_response, 'usage_metadata') and final_response.usage_metadata:
+            add_usage(final_response.usage_metadata, self.llm.model_name, "final_response")
+            if config.show_status_updates:
+                usage = final_response.usage_metadata
+                print_status(f"Tokens used: {usage.get('input_tokens', 0)} input, {usage.get('output_tokens', 0)} output, {usage.get('total_tokens', 0)} total", "usage")
         
         if config.show_status_updates:
             print_status("Final response generated successfully", "success")

@@ -8,15 +8,18 @@ def mock_openai_client(monkeypatch):
     # Create a mock response that LangChain expects
     mock_response = Mock()
     mock_response.content = "sqrt is a mathematical function"
-    
+    # Provide a real usage_metadata dict
+    mock_response.usage_metadata = {
+        'input_tokens': 10,
+        'output_tokens': 5,
+        'total_tokens': 15
+    }
     # Mock the ChatOpenAI class
     mock_llm = Mock()
     mock_llm.invoke.return_value = mock_response
     mock_llm.model_name = "gpt-4.1-mini"
-    
     # Patch the ChatOpenAI import in the agent module
     monkeypatch.setattr("sagely.langgraph_agent.ChatOpenAI", lambda *args, **kwargs: mock_llm)
-    
     return mock_llm
 
 def test_caching(monkeypatch):
@@ -249,4 +252,294 @@ def test_import_hook_module_name():
     mock_module_no_name = Mock(spec=types.ModuleType)
     del mock_module_no_name.__name__
     module_name_fallback = getattr(mock_module_no_name, '__name__', "fallback_name")
-    assert module_name_fallback == "fallback_name" 
+    assert module_name_fallback == "fallback_name"
+
+
+def test_usage_tracking():
+    """Test that token usage is properly tracked."""
+    from sagely.usage_info import (
+        get_usage_tracker, 
+        add_usage, 
+        get_session_total, 
+        clear_usage_history,
+        get_model_usage,
+        get_all_model_usage,
+        TokenUsage
+    )
+    
+    # Clear usage history for clean test
+    clear_usage_history()
+    
+    # Test initial state
+    total = get_session_total()
+    assert total.input_tokens == 0
+    assert total.output_tokens == 0
+    assert total.total_tokens == 0
+    
+    # Add some test usage for different models
+    test_usage = {
+        'input_tokens': 100,
+        'output_tokens': 50,
+        'total_tokens': 150
+    }
+    add_usage(test_usage, "gpt-4", "test_request")
+    
+    # Check that usage was added
+    total = get_session_total()
+    assert total.input_tokens == 100
+    assert total.output_tokens == 50
+    assert total.total_tokens == 150
+    
+    # Add more usage for a different model
+    add_usage({
+        'input_tokens': 200,
+        'output_tokens': 100,
+        'total_tokens': 300
+    }, "gpt-4o", "another_request")
+    
+    # Check cumulative usage
+    total = get_session_total()
+    assert total.input_tokens == 300
+    assert total.output_tokens == 150
+    assert total.total_tokens == 450
+    
+    # Test model-specific usage
+    gpt4_usage = get_model_usage("gpt-4")
+    assert gpt4_usage.input_tokens == 100
+    assert gpt4_usage.output_tokens == 50
+    assert gpt4_usage.total_tokens == 150
+    assert gpt4_usage.model_name == "gpt-4"
+    
+    gpt4o_usage = get_model_usage("gpt-4o")
+    assert gpt4o_usage.input_tokens == 200
+    assert gpt4o_usage.output_tokens == 100
+    assert gpt4o_usage.total_tokens == 300
+    assert gpt4o_usage.model_name == "gpt-4o"
+    
+    # Test getting all model usage
+    all_models = get_all_model_usage()
+    assert "gpt-4" in all_models
+    assert "gpt-4o" in all_models
+    assert len(all_models) == 2
+    
+    # Test usage tracker
+    tracker = get_usage_tracker()
+    recent = tracker.get_recent_usage(2)
+    assert len(recent) == 2
+    assert recent[0].model_name == "gpt-4"
+    assert recent[0].request_type == "test_request"
+    assert recent[1].model_name == "gpt-4o"
+    assert recent[1].request_type == "another_request"
+
+
+def test_usage_tracking_with_mock_llm(monkeypatch):
+    """Test that usage tracking works with mocked LLM responses."""
+    from sagely.usage_info import get_session_total, clear_usage_history
+    
+    # Clear usage history
+    clear_usage_history()
+    
+    # Create a mock response with usage_metadata
+    mock_response = Mock()
+    mock_response.content = "Test response"
+    mock_response.usage_metadata = {
+        'input_tokens': 25,
+        'output_tokens': 15,
+        'total_tokens': 40
+    }
+    
+    # Mock the ChatOpenAI class
+    mock_llm = Mock()
+    mock_llm.invoke.return_value = mock_response
+    mock_llm.model_name = "gpt-4.1-mini"
+    
+    # Patch the ChatOpenAI import
+    monkeypatch.setattr("sagely.langgraph_agent.ChatOpenAI", lambda *args, **kwargs: mock_llm)
+    
+    # Create agent and make a request
+    agent = LangGraphAgent()
+    with patch("sagely.widgets.display_with_highlight"):
+        agent.ask("math", "What is 2+2?", use_cache=False)
+    
+    # Check that usage was tracked
+    total = get_session_total()
+    assert total.total_tokens > 0  # Should have tracked some usage
+
+
+def test_usage_data_attribute():
+    """Test that the usage_data attribute works correctly."""
+    import sagely
+    from sagely import clear_usage_history, add_usage
+    
+    # Clear usage history for clean test
+    clear_usage_history()
+    
+    # Test initial state
+    assert sagely.usage_data.input_tokens == 0
+    assert sagely.usage_data.output_tokens == 0
+    assert sagely.usage_data.total_tokens == 0
+    assert sagely.usage_data.request_count == 0
+    
+    # Add some test usage
+    add_usage({
+        'input_tokens': 100,
+        'output_tokens': 50,
+        'total_tokens': 150
+    }, "gpt-4", "test_request")
+    
+    # Test updated state
+    assert sagely.usage_data.input_tokens == 100
+    assert sagely.usage_data.output_tokens == 50
+    assert sagely.usage_data.total_tokens == 150
+    assert sagely.usage_data.request_count == 1
+    
+    # Test properties
+    assert sagely.usage_data.total.input_tokens == 100
+    assert "Session Token Usage" in sagely.usage_data.summary
+    assert sagely.usage_data.tracker is not None
+    
+    # Test string representation
+    assert "Input tokens: 100" in str(sagely.usage_data)
+    
+    # Test repr representation
+    assert "UsageData(input_tokens=100" in repr(sagely.usage_data)
+    
+    # Test model-specific functionality
+    assert "gpt-4" in sagely.usage_data.models
+    assert sagely.usage_data.get_model_usage("gpt-4").total_tokens == 150
+    assert len(sagely.usage_data.models) == 1
+
+
+def test_model_specific_usage_tracking():
+    """Test that usage is properly tracked per model."""
+    from sagely.usage_info import (
+        clear_usage_history, 
+        add_usage, 
+        get_model_usage, 
+        get_all_model_usage,
+        clear_model_history,
+        get_model_recent_usage
+    )
+    
+    # Clear usage history for clean test
+    clear_usage_history()
+    
+    # Add usage for multiple models
+    add_usage({'input_tokens': 100, 'output_tokens': 50, 'total_tokens': 150}, "gpt-4", "request1")
+    add_usage({'input_tokens': 200, 'output_tokens': 100, 'total_tokens': 300}, "gpt-4o", "request2")
+    add_usage({'input_tokens': 150, 'output_tokens': 75, 'total_tokens': 225}, "gpt-4", "request3")
+    
+    # Test model-specific usage
+    gpt4_usage = get_model_usage("gpt-4")
+    assert gpt4_usage.input_tokens == 250  # 100 + 150
+    assert gpt4_usage.output_tokens == 125  # 50 + 75
+    assert gpt4_usage.total_tokens == 375  # 150 + 225
+    assert gpt4_usage.model_name == "gpt-4"
+    
+    gpt4o_usage = get_model_usage("gpt-4o")
+    assert gpt4o_usage.input_tokens == 200
+    assert gpt4o_usage.output_tokens == 100
+    assert gpt4o_usage.total_tokens == 300
+    assert gpt4o_usage.model_name == "gpt-4o"
+    
+    # Test getting all models
+    all_models = get_all_model_usage()
+    assert len(all_models) == 2
+    assert "gpt-4" in all_models
+    assert "gpt-4o" in all_models
+    
+    # Test model-specific recent usage
+    gpt4_recent = get_model_recent_usage("gpt-4", 2)
+    assert len(gpt4_recent) == 2
+    assert all(usage.model_name == "gpt-4" for usage in gpt4_recent)
+    
+    gpt4o_recent = get_model_recent_usage("gpt-4o", 2)
+    assert len(gpt4o_recent) == 1
+    assert gpt4o_recent[0].model_name == "gpt-4o"
+    
+    # Test clearing specific model history
+    clear_model_history("gpt-4")
+    gpt4_usage_after_clear = get_model_usage("gpt-4")
+    assert gpt4_usage_after_clear.input_tokens == 0
+    assert gpt4_usage_after_clear.output_tokens == 0
+    assert gpt4_usage_after_clear.total_tokens == 0
+    
+    # gpt-4o should still have its usage
+    gpt4o_usage_after_clear = get_model_usage("gpt-4o")
+    assert gpt4o_usage_after_clear.total_tokens == 300
+
+
+def test_file_based_usage_tracking():
+    """Test that usage data is properly saved to and loaded from files."""
+    from sagely.usage_info import (
+        clear_usage_history, 
+        add_usage, 
+        get_session_file_path,
+        get_session_id,
+        get_all_session_files,
+        load_session_from_file,
+        load_latest_session
+    )
+    import tempfile
+    import shutil
+    from pathlib import Path
+    
+    # Clear usage history for clean test
+    clear_usage_history()
+    
+    # Add some test usage
+    add_usage({'input_tokens': 100, 'output_tokens': 50, 'total_tokens': 150}, "gpt-4", "test_request")
+    add_usage({'input_tokens': 200, 'output_tokens': 100, 'total_tokens': 300}, "gpt-4o", "another_request")
+    
+    # Check that file was created
+    session_file = get_session_file_path()
+    assert session_file.exists()
+    assert session_file.name.startswith("usage_")
+    assert session_file.name.endswith(".json")
+    
+    # Check session ID
+    session_id = get_session_id()
+    assert session_id is not None
+    assert len(session_id) > 0
+    
+    # Load the session from file
+    loaded_tracker = load_session_from_file(session_file)
+    
+    # Check that loaded data matches
+    assert loaded_tracker.get_session_total().total_tokens == 450
+    assert loaded_tracker.get_model_usage("gpt-4").total_tokens == 150
+    assert loaded_tracker.get_model_usage("gpt-4o").total_tokens == 300
+    
+    # Check that we can get all session files
+    session_files = get_all_session_files()
+    assert len(session_files) > 0
+    assert session_file in session_files
+    
+    # Test loading latest session
+    latest_tracker = load_latest_session()
+    assert latest_tracker.get_session_total().total_tokens == 450
+
+
+def test_usage_data_file_properties():
+    """Test that usage_data provides access to file-based properties."""
+    import sagely
+    from sagely import clear_usage_history, add_usage
+    
+    # Clear usage history for clean test
+    clear_usage_history()
+    
+    # Add some test usage
+    add_usage({'input_tokens': 100, 'output_tokens': 50, 'total_tokens': 150}, "gpt-4", "test_request")
+    
+    # Test file properties
+    assert sagely.usage_data.session_id is not None
+    assert len(sagely.usage_data.session_id) > 0
+    
+    session_file = sagely.usage_data.session_file_path
+    assert session_file.exists()
+    assert session_file.name.startswith("usage_")
+    assert session_file.name.endswith(".json")
+    
+    # Test that repr includes session_id
+    repr_str = repr(sagely.usage_data)
+    assert "session_id=" in repr_str 

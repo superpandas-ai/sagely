@@ -62,6 +62,9 @@ There are thousands of Python libraries, but their docs aren't always intuitive.
 - ⚙️ **Centralized configuration system** for customizing agent behavior
 - 🎛️ **Direct configuration access** via `sagely.config.attribute = value`
 - 📝 **Configurable line numbers** in console display
+- 💰 **Token usage tracking** with model-specific breakdowns and persistent storage
+- 📈 **Usage analytics** with session management and historical data
+- 🔄 **Real-time usage display** in status updates
 
 ---
 
@@ -262,6 +265,294 @@ load_config()
 The configuration file is automatically created with default settings if it doesn't exist.
 
 
+## 📊 Token Usage Tracking
+
+Sagely provides comprehensive token usage tracking to help you monitor your API costs and usage patterns. The system automatically tracks all LLM requests and stores detailed usage data both in-memory and in persistent JSON files.
+
+### 🎯 Key Features
+
+- **Automatic Tracking**: All LLM requests are automatically tracked
+- **Model-Specific Tracking**: Usage is tracked separately for each LLM model
+- **Real-Time Display**: Token usage is shown in status updates when enabled
+- **Persistent Storage**: Usage data is saved to JSON files in `~/.sagely/usage_data/`
+- **Session Management**: Each session gets a unique file with timestamp
+- **Historical Analysis**: Access to all previous session data
+- **Easy Integration**: Ready for Streamlit app integration
+
+### 🚀 Quick Start
+
+```python
+import sagely
+
+# Check current session usage
+print(f"Total tokens used: {sagely.usage_data.total_tokens:,}")
+print(f"Session ID: {sagely.usage_data.session_id}")
+
+# Make some requests (usage is tracked automatically)
+import requests
+requests.sage.ask("How do I send a POST request?")
+
+# Check updated usage
+print(f"Updated tokens: {sagely.usage_data.total_tokens:,}")
+```
+
+### 📈 Usage Data Access
+
+#### Via `sagely.usage_data` (Recommended)
+The easiest way to access usage information:
+
+```python
+import sagely
+
+# Basic usage information
+print(f"Input tokens: {sagely.usage_data.input_tokens:,}")
+print(f"Output tokens: {sagely.usage_data.output_tokens:,}")
+print(f"Total tokens: {sagely.usage_data.total_tokens:,}")
+print(f"Request count: {sagely.usage_data.request_count}")
+
+# Session information
+print(f"Session ID: {sagely.usage_data.session_id}")
+print(f"File path: {sagely.usage_data.session_file_path}")
+
+# Model-specific usage
+for model_name, usage in sagely.usage_data.models.items():
+    print(f"{model_name}: {usage.total_tokens:,} tokens")
+
+# Get usage for specific model
+gpt4_usage = sagely.usage_data.get_model_usage("gpt-4")
+print(f"gpt-4 usage: {gpt4_usage.total_tokens:,} tokens")
+
+# Get recent usage for a model
+recent = sagely.usage_data.get_model_recent_usage("gpt-4o", 3)
+for usage in recent:
+    print(f"{usage.total_tokens} tokens ({usage.request_type})")
+
+# Comprehensive summary
+print(sagely.usage_data.summary)
+```
+
+#### Via Functions
+```python
+from sagely import (
+    get_session_total, 
+    get_session_summary, 
+    get_model_usage,
+    get_all_model_usage,
+    get_session_id,
+    get_session_file_path
+)
+
+# Get total usage
+total = get_session_total()
+print(f"Total: {total.total_tokens:,} tokens")
+
+# Get formatted summary
+print(get_session_summary())
+
+# Get model-specific usage
+gpt4_usage = get_model_usage("gpt-4")
+print(f"gpt-4: {gpt4_usage.total_tokens:,} tokens")
+
+# Get all models
+all_models = get_all_model_usage()
+for model_name, usage in all_models.items():
+    print(f"{model_name}: {usage.total_tokens:,} tokens")
+```
+
+### 💾 File-Based Storage
+
+Usage data is automatically saved to JSON files in `~/.sagely/usage_data/` with the following structure:
+
+```
+~/.sagely/
+├── config.json
+└── usage_data/
+    ├── usage_20250709_000629.json
+    ├── usage_20250709_000607.json
+    ├── usage_20250709_000557.json
+    └── ...
+```
+
+#### File Naming Convention
+Files are named `usage_YYYYMMDD_HHMMSS.json` where:
+- `YYYYMMDD` = Date (Year-Month-Day)
+- `HHMMSS` = Time (Hour-Minute-Second)
+
+This ensures no data overwrites and provides chronological ordering.
+
+#### JSON Structure
+```json
+{
+  "session_id": "20250709_000629",
+  "session_start": "2025-07-09T00:06:29.375616",
+  "usage_history": [
+    {
+      "input_tokens": 150,
+      "output_tokens": 75,
+      "total_tokens": 225,
+      "timestamp": "2025-07-09T00:06:29.375696",
+      "model_name": "gpt-4",
+      "request_type": "initial_response"
+    }
+  ],
+  "model_usage": {
+    "gpt-4": {
+      "input_tokens": 250,
+      "output_tokens": 125,
+      "total_tokens": 375,
+      "timestamp": "2025-07-09T00:06:29.375700",
+      "model_name": "gpt-4",
+      "request_type": ""
+    }
+  }
+}
+```
+
+### 📊 Session Management
+
+#### Working with Session Files
+```python
+from sagely import (
+    get_all_session_files,
+    load_session_from_file,
+    load_latest_session
+)
+
+# Get all session files (sorted by date, newest first)
+session_files = get_all_session_files()
+for file_path in session_files[:5]:  # Show first 5
+    print(f"Session: {file_path.name}")
+
+# Load specific session
+loaded_tracker = load_session_from_file(session_files[0])
+print(f"Loaded tokens: {loaded_tracker.get_session_total().total_tokens:,}")
+
+# Load latest session
+latest = load_latest_session()
+print(f"Latest session: {latest.get_session_id()}")
+```
+
+#### Session Summary Example
+```
+Session Token Usage:
+  Total input tokens: 1,234
+  Total output tokens: 567
+  Total tokens: 1,801
+  Session duration: 0:05:30
+  Total requests: 5
+
+Model Breakdown:
+  gpt-4:
+    Input tokens: 800
+    Output tokens: 400
+    Total tokens: 1,200
+    Requests: 3
+  gpt-4o:
+    Input tokens: 434
+    Output tokens: 167
+    Total tokens: 601
+    Requests: 2
+```
+
+### 🔄 Usage Management
+
+#### Clearing Usage Data
+```python
+from sagely import clear_usage_history, clear_model_history
+
+# Clear all usage history
+clear_usage_history()
+
+# Clear history for specific model
+clear_model_history("gpt-3.5-turbo")
+```
+
+#### Real-Time Status Updates
+When `show_status_updates` is enabled, you'll see token usage in real-time:
+
+```
+💰 Tokens used: 150 input, 75 output, 225 total
+💰 Tokens used: 200 input, 100 output, 300 total
+💰 Tokens used: 100 input, 50 output, 150 total
+```
+
+### 🎛️ Configuration
+
+Token usage tracking can be configured through the main configuration system:
+
+```python
+import sagely
+
+# Enable/disable status updates (affects usage display)
+sagely.config.show_status_updates = True
+
+# The usage tracking itself is always enabled for data collection
+# Status updates only control the display of usage information
+```
+
+### 📱 Streamlit Integration
+
+The file-based storage system is designed for easy integration with Streamlit apps:
+
+- **JSON Format**: Easy to parse and analyze
+- **Historical Data**: Access to all previous sessions
+- **Model Breakdown**: Detailed model-specific usage
+- **Timestamp Data**: Precise timing information
+- **Session Recovery**: Load any previous session
+
+Example Streamlit data loading:
+```python
+import streamlit as st
+import json
+from pathlib import Path
+
+# Load all session files
+usage_dir = Path.home() / ".sagely" / "usage_data"
+session_files = sorted(usage_dir.glob("usage_*.json"), reverse=True)
+
+# Load and analyze data
+for file_path in session_files:
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+        st.write(f"Session: {data['session_id']}")
+        st.write(f"Total tokens: {sum(usage['total_tokens'] for usage in data['usage_history'])}")
+```
+
+### 🔍 Advanced Usage
+
+#### Custom Usage Analysis
+```python
+from sagely import get_usage_tracker
+
+# Get the usage tracker for advanced operations
+tracker = get_usage_tracker()
+
+# Get recent usage for specific model
+recent_gpt4 = tracker.get_model_recent_usage("gpt-4", 10)
+
+# Analyze usage patterns
+for usage in recent_gpt4:
+    print(f"{usage.timestamp}: {usage.total_tokens} tokens ({usage.request_type})")
+```
+
+#### Usage Statistics
+```python
+import sagely
+
+# Quick usage check
+if sagely.usage_data.total_tokens > 0:
+    print(f"✅ Session active with {sagely.usage_data.total_tokens:,} tokens")
+else:
+    print("ℹ️ No tokens used yet")
+
+# Model comparison
+models = sagely.usage_data.models
+if len(models) > 1:
+    print("📊 Model usage comparison:")
+    for model_name, usage in models.items():
+        print(f"  {model_name}: {usage.total_tokens:,} tokens")
+```
+
 
 ## 🔧 Requirements
 - OpenAI API key (set as `OPENAI_API_KEY` environment variable)
@@ -292,12 +583,23 @@ sagely/
 │   ├── tracing.py            # LangSmith tracing
 │   ├── widgets.py            # Display utilities
 │   ├── config.py             # Centralized configuration system
+│   ├── usage_info.py         # Token usage tracking system
 │   └── __init__.py
 ├── tests/
 ├── examples/                 # Usage examples in Jupyter notebooks
 ├── pyproject.toml
 ├── MANIFEST.in
 └── README.md
+```
+
+### 📁 Data Storage
+```text
+~/.sagely/
+├── config.json              # Configuration file
+└── usage_data/              # Token usage data
+    ├── usage_20250709_000629.json
+    ├── usage_20250709_000607.json
+    └── ...
 ```
 
 ## 🤝 Contributing
