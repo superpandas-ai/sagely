@@ -41,7 +41,9 @@ def install_hook(agent):
         
         # Add sage attribute if it doesn't exist
         if not hasattr(module, 'sage'):
-            module.sage = make_sage_function(agent, module_name)
+            # Use module.__name__ to ensure correct module name
+            module_name_actual = getattr(module, '__name__', module_name)
+            module.sage = make_sage_function(agent, module_name_actual)
     
     # Add sage to existing modules
     for module_name, module in sys.modules.items():

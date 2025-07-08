@@ -4,7 +4,7 @@
 
 <p align="center">
   <b>LLM-powered assistant for every Python package!</b><br/>
-  Just add <code>.sage.ask("your question")</code> to any module.
+  Just add <code>.sage.ask("your question")</code> to talk to any module.
 </p>
 
 <p align="center">
@@ -41,9 +41,9 @@ https://loom.com/share/sagely-demo-link
 
 There are thousands of Python libraries, but their docs aren't always intuitive. Moreover, getting help about errors or finding usage requires (atleast) asking an LLM manually. With sagely, you can do all that right from the REPL or the jupyter notebook:
 
-- You don't need to search Stack Overflow every time you forget a method.
+- You don't need to search Stack Overflow, or ask ChatGPT, every time you forget a method or run into an error.
 - You get context-aware help, including recent exceptions and object summaries.
-- It's built for exploration — whether you're using a notebook, REPL, or script.
+- It's built for exploration — whether you're using a notebook, or REPL.
 
 ---
 
@@ -90,7 +90,7 @@ It hooks into all future module imports.
 ```python
 import matplotlib
 
-matplotlib.sage.ask("how to make a scatter plot?")  # This will print the answer, not return it
+matplotlib.sage.ask("how to make a scatter plot?")  # This will print the answer
 ```
 
 ### In Jupyter / IPython
@@ -104,7 +104,7 @@ matplotlib.sage.ask("how to make a scatter plot?")  # This will print the answer
 ```python
 from sagely import agent
 
-agent.ask("requests", "how do I send a POST request?")  # Prints the answer, does not return it
+agent.ask("requests", "how do I send a POST request?")  # Prints the answer
 ```
 
 ### Status Outputs
@@ -182,7 +182,16 @@ reset_config()
 - `langsmith_project`: LangSmith project name (default: None)
 
 #### Cache Management
+Sagely uses two types of caches to improve performance:
+
+1. **Response Cache**: Stores answers to questions to avoid repeated API calls
+2. **Module Cache**: Stores analyzed module information for faster subsequent queries
+
+To manage caches, import the cache functions:
+
 ```python
+from sagely import clear_caches, clear_module_cache
+
 # Clear all caches
 clear_caches()
 
@@ -252,34 +261,7 @@ load_config()
 
 The configuration file is automatically created with default settings if it doesn't exist.
 
-#### Configuration Examples
-Here are different ways to configure Sagely:
 
-```python
-import sagely
-
-# Method 1: Direct attribute assignment (recommended)
-sagely.config.model_name = "gpt-3.5-turbo"
-sagely.config.show_status_updates = False
-sagely.config.web_search_provider = "tavily"
-
-# Method 2: Programmatic updates
-from sagely.config import update_config
-update_config(
-    model_name="gpt-4.1-mini",
-    show_line_numbers=False,
-    enable_web_search=True
-)
-
-# Method 3: Environment variables
-# export SAGELY_MODEL=gpt-4.1-mini
-# export SAGELY_WEB_SEARCH_PROVIDER=openai_websearch
-
-# Method 4: Configuration file
-# Edit ~/.sagely/config.json directly
-```
-
-All methods work together - environment variables are loaded first, then the config file, and direct assignments take precedence.
 
 ## 🔧 Requirements
 - OpenAI API key (set as `OPENAI_API_KEY` environment variable)
@@ -319,9 +301,9 @@ sagely/
 ```
 
 ## 🤝 Contributing
-Sagely is early-stage — PRs and ideas welcome!
+Sagely is early-stage — PRs and ideas welcome! 💥
 
-We use [Featurebase](https://sagely.featurebase.app/) for product roadmap and feature tracking
+We use [Featurebase](https://sagely.featurebase.app/) for product roadmap and feature requests/tracking
 
 - Want to support other LLM Providers?
 - Want advanced caching or error tracing?
@@ -329,9 +311,7 @@ We use [Featurebase](https://sagely.featurebase.app/) for product roadmap and fe
 - Better prompts
 - Async & Parallel Context Gathering
 - Streaming Response for Jupyter/REPL
-- Improved context for large modules using RAG/Summarization/Selective Filtering
-
-Open an issue or submit a PR. 💥
+- Improved context for large modules using RAG/Summarization/Selective filtering
 
 ## 🧷 License
 MIT © 2025 SuperPandas Ltd 

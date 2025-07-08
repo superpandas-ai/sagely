@@ -25,11 +25,14 @@ from .config import (
     config
 )
 
-# Install the import hook
-install_hook(SageAgent())
+# Create a single agent instance to be shared
+_default_agent = SageAgent()
 
-# Create a default agent instance
-agent = SageAgent()
+# Install the import hook with the shared agent
+install_hook(_default_agent)
+
+# Create a default agent instance (alias to the shared one)
+agent = _default_agent
 
 __version__ = "0.1.0"
 __all__ = [

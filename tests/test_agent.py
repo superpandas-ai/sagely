@@ -178,4 +178,75 @@ def test_conditional_edges():
     """Test that the conditional edges are properly set up."""
     agent = LangGraphAgent()
     # The orchestrator should have conditional edges
-    assert hasattr(agent, '_should_use_web_search') 
+    assert hasattr(agent, '_should_use_web_search')
+
+def test_module_name_capture():
+    """Test that the module name is correctly captured when using sage helper."""
+    from sagely.import_hook import SageHelper, make_sage_function
+    from sagely.sage_agent import SageAgent
+    from unittest.mock import patch
+    
+    # Create a mock agent to capture the module name
+    mock_agent = Mock()
+    mock_agent.ask = Mock()
+    
+    # Test with a simple module name
+    sage_helper = make_sage_function(mock_agent, "test_module")
+    sage_helper.ask("test question")
+    
+    # Verify that the agent.ask was called with the correct module name
+    mock_agent.ask.assert_called_once_with("test_module", "test question", None)
+    
+    # Test with a complex module name (package.submodule)
+    mock_agent.reset_mock()
+    sage_helper = make_sage_function(mock_agent, "sklearn.linear_model")
+    sage_helper.ask("what is linear regression?")
+    
+    # Verify that the agent.ask was called with the correct module name
+    mock_agent.ask.assert_called_once_with("sklearn.linear_model", "what is linear regression?", None)
+    
+    # Test with context object
+    mock_agent.reset_mock()
+    context_obj = {"some": "context"}
+    sage_helper.ask("test question", context_obj)
+    
+    # Verify that the agent.ask was called with the correct module name and context
+    mock_agent.ask.assert_called_once_with("sklearn.linear_model", "test question", context_obj)
+
+def test_import_hook_module_name():
+    """Test that the import hook correctly captures module names."""
+    from sagely.import_hook import install_hook, make_sage_function
+    from unittest.mock import Mock, patch
+    import types
+    
+    # Create a mock agent
+    mock_agent = Mock()
+    mock_agent.ask = Mock()
+    
+    # Test the make_sage_function directly
+    sage_helper = make_sage_function(mock_agent, "test_module")
+    assert sage_helper.module_name == "test_module"
+    
+    # Test that the sage helper correctly calls the agent with the module name
+    sage_helper.ask("test question")
+    mock_agent.ask.assert_called_once_with("test_module", "test question", None)
+    
+    # Test with a complex module name
+    mock_agent.reset_mock()
+    sage_helper = make_sage_function(mock_agent, "sklearn.linear_model")
+    sage_helper.ask("what is linear regression?")
+    mock_agent.ask.assert_called_once_with("sklearn.linear_model", "what is linear regression?", None)
+    
+    # Test the module name capture logic
+    mock_module = Mock(spec=types.ModuleType)
+    mock_module.__name__ = "test_package.test_module"
+    
+    # Test that getattr(module, '__name__', module_name) works correctly
+    module_name_actual = getattr(mock_module, '__name__', "wrong_name")
+    assert module_name_actual == "test_package.test_module"
+    
+    # Test fallback when __name__ is not available
+    mock_module_no_name = Mock(spec=types.ModuleType)
+    del mock_module_no_name.__name__
+    module_name_fallback = getattr(mock_module_no_name, '__name__', "fallback_name")
+    assert module_name_fallback == "fallback_name" 

@@ -45,6 +45,7 @@ class SagelyConfig:
     # Cache instances
     _response_cache: Optional[ResponseCache] = None
     _module_cache: Optional[ModuleInfoCache] = None
+    _initialized: bool = False
     
     @property
     def config_dir(self) -> Path:
@@ -59,6 +60,7 @@ class SagelyConfig:
     def __post_init__(self):
         """Initialize caches after object creation."""
         self._initialize_caches()
+        self._initialized = True
     
     def __setattr__(self, name, value):
         """Override setattr to handle configuration updates."""
@@ -77,8 +79,8 @@ class SagelyConfig:
         if name == 'openai_api_key':
             self._validate_api_keys()
         
-        # Check if reinitialization is needed
-        if name in ['enable_response_cache', 'enable_module_cache']:
+        # Check if reinitialization is needed (only after initialization is complete)
+        if self._initialized and name in ['enable_response_cache', 'enable_module_cache']:
             self._reinitialize()
         
         # Show status update if values actually changed (but not for internal cache attributes)
@@ -186,18 +188,21 @@ class SagelyConfig:
         for key, value in kwargs.items():
             if hasattr(self, key):
                 old_value = getattr(self, key)
-                setattr(self, key, value)
                 
-                # Check if reinitialization is needed
-                if key in ['enable_response_cache', 'enable_module_cache']:
-                    needs_reinit = True
-                
-                # Check if validation is needed
-                if key == 'openai_api_key':
-                    needs_validation = True
-                
-                if self.show_status_updates and old_value != value:
-                    print_status(f"Updated {key}: {old_value} → {value}", "info")
+                # Only update if the value actually changes
+                if old_value != value:
+                    setattr(self, key, value)
+                    
+                    # Check if reinitialization is needed (only after initialization is complete)
+                    if self._initialized and key in ['enable_response_cache', 'enable_module_cache']:
+                        needs_reinit = True
+                    
+                    # Check if validation is needed
+                    if key == 'openai_api_key':
+                        needs_validation = True
+                    
+                    if self.show_status_updates:
+                        print_status(f"Updated {key}: {old_value} → {value}", "info")
             else:
                 if self.show_status_updates:
                     print_status(f"Unknown configuration key: {key}", "warning")
