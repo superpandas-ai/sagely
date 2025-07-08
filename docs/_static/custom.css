@@ -1,0 +1,263 @@
+/* Custom styles for Sagely documentation */
+
+/* Header styling */
+.wy-side-nav-search {
+    background-color: #2980B9;
+}
+
+.wy-side-nav-search input[type=text] {
+    border-color: #2980B9;
+}
+
+/* Navigation styling */
+.wy-nav-side {
+    background: #f8f9fa;
+}
+
+.wy-menu-vertical a {
+    color: #333;
+}
+
+.wy-menu-vertical a:hover {
+    background-color: #2980B9;
+    color: white;
+}
+
+/* Content styling */
+.wy-content-for-nav {
+    background: white;
+}
+
+/* Code block styling */
+.highlight {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+}
+
+/* Admonition styling */
+.admonition {
+    border-left: 4px solid #2980B9;
+    background-color: #f8f9fa;
+}
+
+.admonition-title {
+    background-color: #2980B9;
+    color: white;
+}
+
+/* Button styling */
+.btn {
+    background-color: #2980B9;
+    border-color: #2980B9;
+}
+
+.btn:hover {
+    background-color: #1f5f8b;
+    border-color: #1f5f8b;
+}
+
+/* Table styling */
+.wy-table-responsive table td,
+.wy-table-responsive table th {
+    border: 1px solid #dee2e6;
+}
+
+.wy-table-responsive table th {
+    background-color: #f8f9fa;
+}
+
+/* Footer styling */
+.wy-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .wy-nav-side {
+        width: 100%;
+    }
+    
+    .wy-content-for-nav {
+        margin-left: 0;
+    }
+}
+
+/* Custom admonition colors */
+.admonition-note {
+    border-left-color: #2980B9;
+}
+
+.admonition-warning {
+    border-left-color: #f39c12;
+}
+
+.admonition-tip {
+    border-left-color: #27ae60;
+}
+
+.admonition-important {
+    border-left-color: #e74c3c;
+}
+
+/* Code copy button styling */
+.copybutton {
+    background-color: #2980B9;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.copybutton:hover {
+    background-color: #1f5f8b;
+}
+
+/* Search styling */
+.wy-side-nav-search input[type=text] {
+    border-radius: 4px;
+}
+
+/* Breadcrumb styling */
+.wy-breadcrumbs {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Version selector styling */
+.rst-versions {
+    background-color: #f8f9fa;
+}
+
+.rst-versions .rst-current-version {
+    background-color: #2980B9;
+    color: white;
+}
+
+/* Mobile menu button */
+.wy-nav-top {
+    background-color: #2980B9;
+}
+
+/* Sidebar navigation */
+.wy-nav-side .wy-menu-vertical li.current > a {
+    background-color: #2980B9;
+    color: white;
+}
+
+.wy-nav-side .wy-menu-vertical li.current > a:hover {
+    background-color: #1f5f8b;
+}
+
+/* Content links */
+.wy-content-for-nav a {
+    color: #2980B9;
+}
+
+.wy-content-for-nav a:hover {
+    color: #1f5f8b;
+}
+
+/* API documentation styling */
+.sig {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 8px 0;
+}
+
+.sig-name {
+    color: #2980B9;
+    font-weight: bold;
+}
+
+.sig-prename {
+    color: #6c757d;
+}
+
+.sig-paren {
+    color: #6c757d;
+}
+
+/* Function signature styling */
+.sig-object {
+    background-color: #f8f9fa;
+    border-left: 4px solid #2980B9;
+    padding: 12px;
+    margin: 16px 0;
+}
+
+/* Parameter styling */
+.field-list dt {
+    color: #2980B9;
+    font-weight: bold;
+}
+
+.field-list dd {
+    margin-left: 20px;
+}
+
+/* Return value styling */
+.field-list .field-name {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+/* Exception styling */
+.field-list .field-name:contains("Raises") {
+    color: #e74c3c;
+}
+
+/* Type annotation styling */
+.annotation {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Deprecated styling */
+.deprecated {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 8px 0;
+}
+
+.deprecated::before {
+    content: "⚠️ Deprecated: ";
+    font-weight: bold;
+    color: #856404;
+}
+
+/* New feature styling */
+.versionadded {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 8px 0;
+}
+
+.versionadded::before {
+    content: "🆕 New in version ";
+    font-weight: bold;
+    color: #0c5460;
+}
+
+/* Changed feature styling */
+.versionchanged {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 8px 0;
+}
+
+.versionchanged::before {
+    content: "🔄 Changed in version ";
+    font-weight: bold;
+    color: #856404;
+} 

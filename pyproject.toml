@@ -59,7 +59,7 @@ sagely = "sagely.agent:SageAgent"
 Homepage = "https://github.com/superpandas-ai/sagely"
 Repository = "https://github.com/superpandas-ai/sagely"
 Issues = "https://github.com/superpandas-ai/sagely/issues"
-Documentation = "https://github.com/superpandas-ai/sagely#readme"
+Documentation = "https://sagely.readthedocs.io/"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -206,6 +206,9 @@ clear_caches("module")
 
 # Clear module cache for a specific module
 clear_module_cache("json")
+
+# Clear module cache for all modules
+clear_module_cache()
 ```
 
 #### Environment Variable Configuration
@@ -260,9 +263,84 @@ save_config()
 # Load configuration from file
 from sagely.config import load_config
 load_config()
+
+# Or use the global functions
+from sagely import save_config, load_config
+save_config()
+load_config()
 ```
 
 The configuration file is automatically created with default settings if it doesn't exist.
+
+### 📊 LangSmith Tracing
+
+Sagely supports [LangSmith](https://smith.langchain.com/) for tracing and experiment tracking. To enable LangSmith tracing:
+
+1. **Install dependencies** (already included):
+   - `langsmith`
+   - `langchain-core`
+
+2. **Set environment variables** (in your shell or `.env` file):
+   ```sh
+   export LANGCHAIN_TRACING_V2=true
+   export LANGCHAIN_API_KEY=your-langsmith-api-key
+   export LANGCHAIN_PROJECT=your-project-name  # optional
+   ```
+
+3. **Enable tracing in configuration**:
+   ```python
+   import sagely
+   sagely.config.enable_langsmith_tracing = True
+   sagely.config.langsmith_project = "my-sagely-project"  # optional
+   ```
+
+4. **Run your code as usual**. All LangChain and LangGraph runs will be traced to your LangSmith dashboard.
+
+For more details, see the [LangSmith docs](https://docs.smith.langchain.com/docs/tracing/).
+
+### 🔧 Direct Tool Access
+
+You can access the built-in tools directly for custom implementations:
+
+```python
+from sagely.langgraph_agent import analyze_module, get_error_context, web_search
+
+# Analyze a module with comprehensive information
+module_info = analyze_module.invoke({"module_name": "json"})
+print(module_info)
+# Output includes: documentation, functions with docstrings, classes, and submodules
+
+# Get error context
+error_info = get_error_context.invoke({})
+print(error_info)
+
+# Search the web
+web_result = web_search.invoke({"query": "python pandas performance optimization"})
+print(web_result)
+```
+
+### 📝 Prompt Customization
+
+All prompts are available in the `sagely.prompts` module for customization:
+
+```python
+from sagely.prompts import (
+    INITIAL_RESPONSE_PROMPT,
+    ORCHESTRATOR_EVALUATION_PROMPT,
+    FINAL_RESPONSE_WITH_WEB_PROMPT,
+    FINAL_RESPONSE_WITHOUT_WEB_PROMPT,
+    SYSTEM_MESSAGE_TEMPLATE
+)
+
+# Use prompts for custom implementations
+system_msg = SYSTEM_MESSAGE_TEMPLATE.format(module_name="numpy")
+initial_prompt = INITIAL_RESPONSE_PROMPT.format(
+    traceback="No errors",
+    context_summary="Working with arrays",
+    module_info="NumPy module info",
+    question="How to create arrays?"
+)
+```
 
 
 ## 📊 Token Usage Tracking
@@ -557,6 +635,9 @@ if len(models) > 1:
 ## 🔧 Requirements
 - OpenAI API key (set as `OPENAI_API_KEY` environment variable)
 - Tavily API key (optional, for Tavily web search provider)
+- LangSmith API key (optional, for tracing)
+
+### Dependencies
 - openai
 - ipywidgets
 - rich
@@ -564,10 +645,11 @@ if len(models) > 1:
 - langgraph
 - langchain-openai
 - langchain-tavily (for Tavily web search)
+- langchain-core
 - requests
 - langsmith (optional, for tracing)
 
-(Installed automatically.)
+(All dependencies are installed automatically.)
 
 ## 🧠 Project Structure
 ```text
@@ -607,13 +689,17 @@ Sagely is early-stage — PRs and ideas welcome! 💥
 
 We use [Featurebase](https://sagely.featurebase.app/) for product roadmap and feature requests/tracking
 
-- Want to support other LLM Providers?
-- Want advanced caching or error tracing?
-- Want to auto-annotate cells with answers?
-- Better prompts
+### 🚀 Future Features
+- Support for other LLM Providers
+- Advanced caching and error tracing
+- Auto-annotation of cells with answers
+- Better prompts and prompt management
 - Async & Parallel Context Gathering
 - Streaming Response for Jupyter/REPL
 - Improved context for large modules using RAG/Summarization/Selective filtering
+- Enhanced web search capabilities
+- Custom agent workflows
+- Integration with more development tools
 
 ## 🧷 License
 MIT © 2025 SuperPandas Ltd 
